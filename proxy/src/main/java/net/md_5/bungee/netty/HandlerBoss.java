@@ -3,7 +3,6 @@ package net.md_5.bungee.netty;
 import com.google.common.base.Preconditions;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.MessageList;
 import io.netty.handler.timeout.ReadTimeoutException;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.connection.CancelSendSignal;
@@ -50,26 +49,23 @@ public class HandlerBoss extends ChannelInboundHandlerAdapter
     }
 
     @Override
-    public void messageReceived(ChannelHandlerContext ctx, MessageList<Object> messageList) throws Exception {
-        for ( Object msg : messageList )
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        if (handler != null && ctx.channel().isActive())
         {
-            if (handler != null && ctx.channel().isActive())
+            DefinedPacket packet = DefinedPacket.packet( (byte[]) msg );
+            boolean sendPacket = true;
+            if (packet != null)
             {
-                DefinedPacket packet = DefinedPacket.packet( (byte[]) msg );
-                boolean sendPacket = true;
-                if (packet != null)
+                try
                 {
-                    try
-                    {
-                        packet.handle(handler);
-                    } catch ( CancelSendSignal ex ) {
-                        sendPacket = false;
-                    }
+                    packet.handle(handler);
+                } catch ( CancelSendSignal ex ) {
+                    sendPacket = false;
                 }
-                if ( sendPacket )
-                {
-                    handler.handle((byte[]) msg);
-                }
+            }
+            if ( sendPacket )
+            {
+                handler.handle((byte[]) msg);
             }
         }
     }
