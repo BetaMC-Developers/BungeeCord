@@ -114,7 +114,7 @@ public class DownstreamBridge extends PacketHandler
             con.connectNow( event.getCancelServer() );
         } else
         {
-            con.disconnect( "[Kicked] " + event.getKickReason() );
+            con.disconnect( event.getKickReason() );
         }
         throw new CancelSendSignal();
     }
