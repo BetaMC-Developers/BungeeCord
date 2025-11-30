@@ -1,10 +1,6 @@
 package net.md_5.bungee;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.AsyncHttpClientConfig;
-import com.ning.http.client.providers.netty.NettyAsyncHttpProvider;
-import com.ning.http.client.providers.netty.NettyAsyncHttpProviderConfig;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelException;
@@ -120,11 +116,12 @@ public class BungeeCord extends ProxyServer
     private final File pluginsFolder = new File( "plugins" );
     @Getter
     private final TaskScheduler scheduler = new BungeeScheduler();
-    @Getter
+    // BMC - remove http client
+    /*@Getter
     private final AsyncHttpClient httpClient = new AsyncHttpClient(
             new NettyAsyncHttpProvider(
             new AsyncHttpClientConfig.Builder().setAsyncHttpClientProviderConfig(
-            new NettyAsyncHttpProviderConfig().addProperty( NettyAsyncHttpProviderConfig.BOSS_EXECUTOR_SERVICE, executors ) ).setExecutorService( executors ).build() ) );
+            new NettyAsyncHttpProviderConfig().addProperty( NettyAsyncHttpProviderConfig.BOSS_EXECUTOR_SERVICE, executors ) ).setExecutorService( executors ).build() ) );*/
 
     
     {
@@ -244,7 +241,7 @@ public class BungeeCord extends ProxyServer
     {
         this.isRunning = false;
 
-        httpClient.close();
+        //httpClient.close(); // BMC - remove http client
         executors.shutdown();
 
         stopListeners();

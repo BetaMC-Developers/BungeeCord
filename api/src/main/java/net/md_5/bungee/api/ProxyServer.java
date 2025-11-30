@@ -1,7 +1,6 @@
 package net.md_5.bungee.api;
 
 import com.google.common.base.Preconditions;
-import com.ning.http.client.AsyncHttpClient;
 import lombok.Getter;
 import net.md_5.bungee.api.config.ConfigurationAdapter;
 import net.md_5.bungee.api.config.ServerInfo;
@@ -240,12 +239,12 @@ public abstract class ProxyServer
      */
     public abstract TaskScheduler getScheduler();
 
-    /**
-     * Gets the the web client used by this proxy to facilitate making web
-     * requests. Care should be taken to ensure that all operations are non
-     * blocking where applicable.
-     *
-     * @return the server's {@link AsyncHttpClient} instance
-     */
-    public abstract AsyncHttpClient getHttpClient();
+//    /**
+//     * Gets the the web client used by this proxy to facilitate making web
+//     * requests. Care should be taken to ensure that all operations are non
+//     * blocking where applicable.
+//     *
+//     * @return the server's {@link AsyncHttpClient} instance
+//     */
+//    public abstract AsyncHttpClient getHttpClient(); // BMC - remove http client
 }
