@@ -43,7 +43,7 @@ public class Configuration
         adapter.load();
 
         timeout = adapter.getInt( "timeout", timeout );
-        uuid = adapter.getString( "stats", uuid );
+        //uuid = adapter.getString( "stats", uuid ); // BMC - remove stats key
         playerLimit = adapter.getInt( "player_limit", playerLimit );
 
         ipForwarding = adapter.getBoolean( "ip_forward", true );
