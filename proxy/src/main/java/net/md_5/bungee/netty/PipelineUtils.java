@@ -53,6 +53,7 @@ public class PipelineUtils
         {
             try
             {
+                ch.config().setOption(ChannelOption.TCP_NODELAY, true); // BMC - disable nagle's algorithm
                 ch.config().setOption( ChannelOption.IP_TOS, 0x18 );
             } catch ( ChannelException ex )
             {
