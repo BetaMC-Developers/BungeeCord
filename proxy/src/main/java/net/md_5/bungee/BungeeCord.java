@@ -4,8 +4,12 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelException;
+import io.netty.channel.MultiThreadIoEventLoopGroup;
 import io.netty.channel.MultithreadEventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.epoll.Epoll;
+import io.netty.channel.epoll.EpollIoHandler;
+import io.netty.channel.epoll.EpollServerSocketChannel;
+import io.netty.channel.nio.NioIoHandler;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import lombok.Getter;
 import lombok.Setter;
@@ -81,7 +85,12 @@ public class BungeeCord extends ProxyServer
      * Thread pools.
      */
     public final ScheduledExecutorService executors = new ScheduledThreadPoolExecutor( 8, new ThreadFactoryBuilder().setNameFormat( "Bungee Pool Thread #%1$d" ).build() );
-    public final MultithreadEventLoopGroup eventLoops = new NioEventLoopGroup( Runtime.getRuntime().availableProcessors(), new ThreadFactoryBuilder().setNameFormat( "Netty IO Thread #%1$d" ).build() );
+    // BMC - use MultiThreadIoEventLoopGroup and use Epoll I/O if it's available
+    public final MultithreadEventLoopGroup eventLoops = new MultiThreadIoEventLoopGroup(
+            Runtime.getRuntime().availableProcessors(),
+            new ThreadFactoryBuilder().setNameFormat( "Netty IO Thread #%1$d" ).build(),
+            Epoll.isAvailable() ? EpollIoHandler.newFactory() : NioIoHandler.newFactory()
+    );
     /**
      * locations.yml save thread.
      */
@@ -208,7 +217,8 @@ public class BungeeCord extends ProxyServer
         for ( ListenerInfo info : config.getListeners() )
         {
             Channel server = new ServerBootstrap()
-                    .channel( NioServerSocketChannel.class )
+                    // BMC - use Epoll I/O if it's available
+                    .channel(Epoll.isAvailable() ? EpollServerSocketChannel.class : NioServerSocketChannel.class)
                     .childAttr( PipelineUtils.LISTENER, info )
                     .childHandler( PipelineUtils.SERVER_CHILD )
                     .group( eventLoops )
@@ -254,7 +264,7 @@ public class BungeeCord extends ProxyServer
         }
 
         getLogger().info( "Closing IO threads" );
-        eventLoops.shutdown();
+        eventLoops.shutdownGracefully().syncUninterruptibly(); // BMC - shutdown gracefully
 
         getLogger().info( "Saving reconnect locations" );
         reconnectHandler.save();

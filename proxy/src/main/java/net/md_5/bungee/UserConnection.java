@@ -8,6 +8,8 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
+import io.netty.channel.epoll.Epoll;
+import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -123,7 +125,8 @@ public final class UserConnection implements ProxiedPlayer
         ProxyServer.getInstance().getPluginManager().callEvent( event );
         final ServerInfo target = event.getTarget(); // Update in case the event changed target
         new Bootstrap()
-                .channel( NioSocketChannel.class )
+                // BMC - use Epoll I/O if it's available
+                .channel(Epoll.isAvailable() ? EpollSocketChannel.class : NioSocketChannel.class)
                 .group( BungeeCord.getInstance().eventLoops )
                 .handler( new ChannelInitializer()
         {
