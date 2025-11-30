@@ -96,7 +96,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection
     {
         if ( ch.isActive() )
         {
-            ch.write( new PacketFFKick( reason ) );
+            ch.writeAndFlush( new PacketFFKick( reason ) ); // BMC - writeAndFlush
             ch.close();
         }
     }

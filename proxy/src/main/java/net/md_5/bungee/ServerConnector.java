@@ -38,13 +38,13 @@ public class ServerConnector extends PacketHandler
     public void connected(Channel channel) throws Exception
     {
         this.ch = channel;
-        channel.write( user.handshake );
+        channel.writeAndFlush( user.handshake ); // BMC - writeAndFlush
         // IP Forwarding
         boolean flag = BungeeCord.getInstance().config.isIpForwarding();
         long address = flag ? Util.serializeAddress(user.getAddress().getAddress().getHostAddress()) : 0;
         byte header = (byte) (flag ? MAGIC_HEADER : 0);
         // end
-        channel.write(new Packet1Login(BungeeCord.PROTOCOL_VERSION,  user.handshake.username, address, header));
+        channel.writeAndFlush(new Packet1Login(BungeeCord.PROTOCOL_VERSION,  user.handshake.username, address, header)); // BMC - writeAndFlush
     }
 
     @Override
@@ -60,7 +60,7 @@ public class ServerConnector extends PacketHandler
         Queue<DefinedPacket> packetQueue = ( (BungeeServerInfo) target ).getPacketQueue();
         while ( !packetQueue.isEmpty() )
         {
-            ch.write( packetQueue.poll() );
+            ch.writeAndFlush( packetQueue.poll() ); // BMC - writeAndFlush
         }
 
         synchronized ( user.getSwitchMutex() )
@@ -78,15 +78,15 @@ public class ServerConnector extends PacketHandler
                         login.seed,
                         login.dimension
                 );
-                user.ch.write( modLogin );
+                user.ch.writeAndFlush( modLogin ); // BMC - writeAndFlush
             } else
             {
                 byte oppositeDimension = (byte) ( login.dimension >= 0 ? -1 : 0 );
 
                 user.serverEntityId = login.entityId;
 
-                user.ch.write( new Packet9Respawn( oppositeDimension ) );
-                user.ch.write( new Packet9Respawn( login.dimension) );
+                user.ch.writeAndFlush( new Packet9Respawn( oppositeDimension ) ); // BMC - writeAndFlush
+                user.ch.writeAndFlush( new Packet9Respawn( login.dimension) ); // BMC - writeAndFlush
 
                 // Remove from old servers
                 user.getServer().setObsolete( true );

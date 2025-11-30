@@ -22,7 +22,7 @@ public class PingHandler extends PacketHandler
     @Override
     public void connected(Channel channel) throws Exception
     {
-        channel.write( pingBuf );
+        channel.writeAndFlush( pingBuf ); // BMC - writeAndFlush
     }
 
     @Override

@@ -82,7 +82,7 @@ public final class UserConnection implements ProxiedPlayer
 
     public void sendPacket(DefinedPacket p)
     {
-        ch.write( p );
+        ch.writeAndFlush( p ); // BMC - writeAndFlush
     }
 
     @Override
@@ -112,8 +112,8 @@ public final class UserConnection implements ProxiedPlayer
 
     public void connectNow(ServerInfo target)
     {
-        ch.write( Packet9Respawn.DIM1_SWITCH );
-        ch.write( Packet9Respawn.DIM2_SWITCH );
+        ch.writeAndFlush( Packet9Respawn.DIM1_SWITCH ); // BMC - writeAndFlush
+        ch.writeAndFlush( Packet9Respawn.DIM2_SWITCH ); // BMC - writeAndFlush
         connect( target );
     }
 
@@ -170,7 +170,7 @@ public final class UserConnection implements ProxiedPlayer
         if ( ch.isActive() )
         {
             bungee.getLogger().log( Level.INFO, "[" + getName() + "] disconnected with: " + reason );
-            ch.write( new PacketFFKick( reason ) );
+            ch.writeAndFlush( new PacketFFKick( reason ) ); // BMC - writeAndFlush
             ch.close();
             if ( server != null )
             {
@@ -183,13 +183,13 @@ public final class UserConnection implements ProxiedPlayer
     public void chat(String message)
     {
         Preconditions.checkState( server != null, "Not connected to server" );
-        server.getCh().write( new Packet3Chat( message ) );
+        server.getCh().writeAndFlush( new Packet3Chat( message ) ); // BMC - writeAndFlush
     }
 
     @Override
     public void sendMessage(String message)
     {
-        ch.write( new Packet3Chat( message ) );
+        ch.writeAndFlush( new Packet3Chat( message ) ); // BMC - writeAndFlush
     }
 
     @Override

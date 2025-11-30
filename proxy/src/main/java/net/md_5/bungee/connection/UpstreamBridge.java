@@ -46,7 +46,7 @@ public class UpstreamBridge extends PacketHandler
         EntityMap.rewrite( buf, con.clientEntityId, con.serverEntityId );
         if ( con.getServer() != null )
         {
-            con.getServer().getCh().write( buf );
+            con.getServer().getCh().writeAndFlush( buf ); // BMC - writeAndFlush
         }
     }
 

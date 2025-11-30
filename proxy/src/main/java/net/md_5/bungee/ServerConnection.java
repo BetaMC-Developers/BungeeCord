@@ -42,7 +42,7 @@ public class ServerConnection implements Server
     {
         if ( ch.isActive() )
         {
-            ch.write( new PacketFFKick( reason ) );
+            ch.writeAndFlush( new PacketFFKick( reason ) ); // BMC - writeAndFlush
             ch.eventLoop().schedule( new Runnable()
             {
                 @Override
