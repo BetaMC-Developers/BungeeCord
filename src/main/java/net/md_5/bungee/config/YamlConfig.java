@@ -6,7 +6,6 @@ import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.config.ConfigurationAdapter;
 import net.md_5.bungee.api.config.ListenerInfo;
 import net.md_5.bungee.api.config.ServerInfo;
-import net.md_5.bungee.api.config.TexturePackInfo;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
