@@ -1,6 +1,11 @@
 package net.md_5.bungee.protocol.netty;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufInputStream;
+import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.connection.InitialHandler;
+import net.md_5.bungee.netty.HandlerBoss;
+import net.md_5.bungee.packet.PacketHandler;
 import net.md_5.bungee.protocol.PacketDefinitions;
 import net.md_5.bungee.protocol.PacketDefinitions.OpCode;
 
@@ -60,8 +65,24 @@ public class PacketReader
         }
     }
 
-    private static void readPacket(int packetId, ByteBuf in) throws IOException
+    // BMC - change signature
+    public static void readPacket(ByteBuf in, HandlerBoss handlerBoss) throws IOException
     {
+        // BMC start
+        in.markReaderIndex();
+        int packetId = in.readUnsignedByte();
+
+        PacketHandler packetHandler = handlerBoss.getHandler();
+        if (packetHandler instanceof InitialHandler) {
+            InitialHandler initialHandler = (InitialHandler) packetHandler;
+            if (packetId > 2 || initialHandler.isRequestedStatus()) {
+                in.resetReaderIndex();
+                initialHandler.handleQuery(new ByteBufInputStream(in));
+                return;
+            }
+        }
+        // BMC end
+
         Instruction[] packetDef = null;
         if ( packetId < instructions.length )
         {
@@ -70,7 +91,8 @@ public class PacketReader
 
         if ( packetDef == null )
         {
-            throw new IOException( "Unknown packet id " + packetId );
+            ProxyServer.getInstance().getLogger().info("Unknown packet id " + packetId); // BMC - make less verbose
+            return;
         }
 
         for ( Instruction instruction : packetDef )
@@ -79,9 +101,4 @@ public class PacketReader
         }
     }
 
-    public static void readPacket(ByteBuf in) throws IOException
-    {
-        int packetId = in.readUnsignedByte();
-        readPacket( packetId, in );
-    }
 }

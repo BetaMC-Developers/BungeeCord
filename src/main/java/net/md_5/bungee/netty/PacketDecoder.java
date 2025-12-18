@@ -17,11 +17,18 @@ import java.util.List;
  */
 public class PacketDecoder extends ReplayingDecoder<Void>
 {
+    // BMC start
+    private final HandlerBoss handlerBoss;
+
+    public PacketDecoder(HandlerBoss handlerBoss) {
+        this.handlerBoss = handlerBoss;
+    }
+    // BMC end
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception    {
         int startIndex = in.readerIndex();
-        PacketReader.readPacket( in );
+        PacketReader.readPacket(in, handlerBoss); // BMC - pass handlerBoss
         byte[] buf = new byte[ in.readerIndex() - startIndex ];
         in.readerIndex( startIndex );
         in.readBytes( buf, 0, buf.length );

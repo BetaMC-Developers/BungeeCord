@@ -59,11 +59,12 @@ public class PipelineUtils
             {
                 // IP_TOS is not supported (Windows XP / Windows Server 2003)
             }
+            HandlerBoss handlerBoss = new HandlerBoss(); // BMC - instantiate here
             ch.pipeline().addLast( "timer", new ReadTimeoutHandler( BungeeCord.getInstance().config.getTimeout(), TimeUnit.MILLISECONDS ) );
-            ch.pipeline().addLast( "decoder", new PacketDecoder() );
+            ch.pipeline().addLast( "decoder", new PacketDecoder(handlerBoss) ); // BMC - pass handlerBoss to PacketDecoder
             ch.pipeline().addLast( "packet-encoder", packetEncoder );
             ch.pipeline().addLast( "array-encoder", arrayEncoder );
-            ch.pipeline().addLast( "handler", new HandlerBoss() );
+            ch.pipeline().addLast( "handler", handlerBoss );
         }
     };
 }

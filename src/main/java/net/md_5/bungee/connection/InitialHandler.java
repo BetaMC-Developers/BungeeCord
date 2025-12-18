@@ -1,6 +1,10 @@
 package net.md_5.bungee.connection;
 
 import com.google.common.base.Preconditions;
+import com.google.gson.JsonObject;
+import io.netty.buffer.ByteBufInputStream;
+import io.netty.buffer.ByteBufOutputStream;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +25,9 @@ import net.md_5.bungee.packet.PacketFEPing;
 import net.md_5.bungee.packet.PacketFFKick;
 import net.md_5.bungee.packet.PacketHandler;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 
 @RequiredArgsConstructor
@@ -33,6 +40,12 @@ public class InitialHandler extends PacketHandler implements PendingConnection
     private final ListenerInfo listener;
     private Packet2Handshake handshake;
     private State thisState = State.HANDSHAKE;
+
+    // BMC start
+    @Getter
+    private boolean requestedStatus;
+    private int requestVersion = 14;
+    // BMC end
 
     private enum State
     {
@@ -90,6 +103,72 @@ public class InitialHandler extends PacketHandler implements PendingConnection
         thisState = State.FINISHED;
         throw new CancelSendSignal();
     }
+
+    // BMC start - modern query protocol
+    public void handleQuery(ByteBufInputStream in) {
+        try {
+            int length = Util.readVarInt(in);
+            int id = Util.readVarInt(in);
+            if (id == 0) {
+                if (length != 1) {
+                    requestVersion = Util.readVarInt(in);
+                    Util.readUTF8(in);
+                    in.readUnsignedShort();
+                    Util.readVarInt(in);
+                    requestedStatus = true;
+                } else {
+                    doStatusResponse();
+                }
+            } else if (id == 1) {
+                long time = in.readLong();
+                doPongResponse(time);
+            }
+        } catch (IOException e) {
+        }
+    }
+
+    private void doStatusResponse() throws IOException {
+        JsonObject root = new JsonObject();
+
+        JsonObject version = new JsonObject();
+        version.addProperty("name", bungee.getGameVersion());
+        version.addProperty("protocol", requestVersion);
+        root.add("version", version);
+
+        JsonObject players = new JsonObject();
+        players.addProperty("max", listener.getMaxPlayers());
+        players.addProperty("online", bungee.getPlayers().size());
+        root.add("players", players);
+
+        JsonObject description = new JsonObject();
+        description.addProperty("text", listener.getMotd());
+        root.add("description", description);
+
+        /*if (server.serverIcon != null) {
+            root.addProperty("favicon", "data:image/png;base64," + new String(server.serverIcon, StandardCharsets.ISO_8859_1));
+        }*/
+
+        ByteBufOutputStream out = new ByteBufOutputStream(Unpooled.buffer());
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        String response = root.toString();
+        Util.writeVarInt(0, bytes);
+        Util.writeUTF8(response, bytes);
+        Util.writeVarInt(bytes.size(), out);
+        bytes.writeTo(out);
+        ch.writeAndFlush(out.buffer());
+    }
+
+    private void doPongResponse(long time) throws IOException {
+        ByteBufOutputStream out = new ByteBufOutputStream(Unpooled.buffer());
+        ByteArrayOutputStream pong = new ByteArrayOutputStream();
+        DataOutputStream data = new DataOutputStream(pong);
+        Util.writeVarInt(1, data);
+        data.writeLong(time);
+        Util.writeVarInt(pong.size(), out);
+        pong.writeTo(out);
+        ch.writeAndFlush(out.buffer()).addListener(future -> ch.close());
+    }
+    // BMC end
 
     @Override
     public synchronized void disconnect(String reason)

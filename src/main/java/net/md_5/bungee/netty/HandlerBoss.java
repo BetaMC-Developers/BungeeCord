@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.ReadTimeoutException;
+import lombok.Getter;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.connection.CancelSendSignal;
 import net.md_5.bungee.packet.DefinedPacket;
@@ -20,6 +21,7 @@ import java.util.logging.Level;
 public class HandlerBoss extends ChannelInboundHandlerAdapter
 {
 
+    @Getter // BMC
     private PacketHandler handler;
 
     public void setHandler(PacketHandler handler)
