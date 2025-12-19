@@ -1,10 +1,9 @@
 package net.md_5.bungee.scheduler;
 
 import com.google.common.base.Preconditions;
-import gnu.trove.TCollections;
-import gnu.trove.iterator.TIntObjectIterator;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
@@ -16,7 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class BungeeScheduler implements TaskScheduler {
 
     private final AtomicInteger taskCounter = new AtomicInteger();
-    private final TIntObjectMap<BungeeTask> tasks = TCollections.synchronizedMap(new TIntObjectHashMap<BungeeTask>());
+    private final Int2ObjectMap<BungeeTask> tasks = Int2ObjectMaps.synchronize(new Int2ObjectOpenHashMap<>()); // BMC - fastutil
 
     @Override
     public void cancel(int id) {
@@ -31,16 +30,19 @@ public class BungeeScheduler implements TaskScheduler {
 
     @Override
     public int cancel(Plugin plugin) {
-        int cancelled = 0;
-        for (TIntObjectIterator<BungeeTask> iter = tasks.iterator(); iter.hasNext(); ) {
-            BungeeTask task = iter.value();
+        // BMC start - fastutil
+        AtomicInteger cancelled = new AtomicInteger();
+        tasks.int2ObjectEntrySet().removeIf(entry -> {
+            BungeeTask task = entry.getValue();
             if (task.getOwner() == plugin) {
                 task.getFuture().cancel(false);
-                iter.remove();
-                cancelled++;
+                cancelled.getAndIncrement();
+                return true;
             }
-        }
-        return cancelled;
+            return false;
+        });
+        // BMC end
+        return cancelled.get();
     }
 
     @Override

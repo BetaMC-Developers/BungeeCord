@@ -1,7 +1,6 @@
 package net.md_5.bungee;
 
 import com.google.common.base.Preconditions;
-import gnu.trove.set.hash.THashSet;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -11,6 +10,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -58,8 +58,8 @@ public final class UserConnection implements ProxiedPlayer {
     @Setter
     private int ping = 1000;
     // Permissions
-    private final Collection<String> playerGroups = new THashSet<>();
-    private final Collection<String> permissions = new THashSet<>();
+    private final Collection<String> playerGroups = new ObjectOpenHashSet<>(); // BMC - fastutil
+    private final Collection<String> permissions = new ObjectOpenHashSet<>(); // BMC - fastutil
     private final Object permMutex = new Object();
 
     @Getter
