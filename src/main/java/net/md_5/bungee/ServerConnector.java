@@ -77,6 +77,18 @@ public class ServerConnector extends PacketHandler {
 
                 user.serverEntityId = login.entityId;
 
+                // BMC start - option to send login packet when switching servers
+                if (BungeeCord.getInstance().config.isSendLoginPacketOnServerSwitch()) {
+                    Packet1Login modLogin = new Packet1Login(
+                            login.entityId,
+                            login.username,
+                            login.seed,
+                            login.dimension
+                    );
+                    user.ch.writeAndFlush(modLogin);
+                }
+                // BMC end
+
                 user.ch.writeAndFlush(new Packet9Respawn(oppositeDimension)); // BMC - writeAndFlush
                 user.ch.writeAndFlush(new Packet9Respawn(login.dimension)); // BMC - writeAndFlush
 
