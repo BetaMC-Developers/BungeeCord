@@ -29,6 +29,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 
 @RequiredArgsConstructor
 public class InitialHandler extends PacketHandler implements PendingConnection
@@ -144,9 +145,9 @@ public class InitialHandler extends PacketHandler implements PendingConnection
         description.addProperty("text", listener.getMotd());
         root.add("description", description);
 
-        /*if (server.serverIcon != null) {
-            root.addProperty("favicon", "data:image/png;base64," + new String(server.serverIcon, StandardCharsets.ISO_8859_1));
-        }*/
+        if (bungee.getIcon().getRawData() != null) {
+            root.addProperty("favicon", "data:image/png;base64," + new String(bungee.getIcon().getRawData(), StandardCharsets.ISO_8859_1));
+        }
 
         ByteBufOutputStream out = new ByteBufOutputStream(Unpooled.buffer());
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();

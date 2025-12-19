@@ -3,6 +3,7 @@ package net.md_5.bungee.api;
 import com.google.common.base.Preconditions;
 import lombok.Getter;
 import net.md_5.bungee.api.config.ConfigurationAdapter;
+import net.md_5.bungee.api.config.Icon;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.connection.Server;
@@ -102,6 +103,15 @@ public abstract class ProxyServer
      * @return the server info belonging to the specified server
      */
     public abstract ServerInfo getServerInfo(String name);
+
+    // BMC start
+    /**
+     * Gets the icon for this proxy.
+     *
+     * @return the icon
+     */
+    public abstract Icon getIcon();
+    // BMC end
 
     /**
      * Get the {@link PluginManager} associated with loading plugins and

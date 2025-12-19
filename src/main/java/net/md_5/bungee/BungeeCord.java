@@ -18,6 +18,7 @@ import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.ReconnectHandler;
 import net.md_5.bungee.api.config.ConfigurationAdapter;
+import net.md_5.bungee.api.config.Icon;
 import net.md_5.bungee.api.config.ListenerInfo;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -80,6 +81,13 @@ public class BungeeCord extends ProxyServer
      * Configuration.
      */
     public final Configuration config = new Configuration();
+    // BMC start
+    /**
+     * Icon.
+     */
+    @Getter
+    private final Icon icon = new Icon();
+    // BMC end
     /**
      * Thread pools.
      */
@@ -185,6 +193,7 @@ public class BungeeCord extends ProxyServer
         pluginsFolder.mkdir();
         pluginManager.loadPlugins( pluginsFolder );
         config.load();
+        icon.load(); // BMC
         if ( reconnectHandler == null )
         {
             reconnectHandler = new YamlReconnectHandler();
