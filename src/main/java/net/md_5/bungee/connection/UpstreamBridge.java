@@ -31,7 +31,6 @@ public class UpstreamBridge extends PacketHandler
         // We lost connection to the client
         PlayerDisconnectEvent event = new PlayerDisconnectEvent( con );
         bungee.getPluginManager().callEvent( event );
-        bungee.getTabListHandler().onDisconnect( con );
         bungee.getPlayers().remove( con );
 
         if ( con.getServer() != null )
@@ -56,7 +55,6 @@ public class UpstreamBridge extends PacketHandler
         if ( alive.id == con.trackingPingId )
         {
             int newPing = (int) ( System.currentTimeMillis() - con.pingTime );
-            bungee.getTabListHandler().onPingChange( con, newPing );
             con.setPing( newPing );
         }
     }
