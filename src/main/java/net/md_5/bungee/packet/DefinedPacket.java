@@ -17,37 +17,33 @@ import java.lang.reflect.InvocationTargetException;
  * subclasses can read and write to the backing byte array which can be
  * retrieved via the {@link #getPacket()} method.
  */
-public abstract class DefinedPacket implements DataOutput
-{
+public abstract class DefinedPacket implements DataOutput {
 
-    private static interface Overriden
-    {
+    private static interface Overriden {
 
         void readUTF();
 
         void writeUTF(String s);
     }
+
     private ByteArrayInputStream byteStream;
     private DataInputStream in;
     @Delegate(excludes = Overriden.class)
     private ByteArrayDataOutput out;
     private byte[] buf;
 
-    public DefinedPacket(int id, byte[] buf)
-    {
-        byteStream = new ByteArrayInputStream( buf );
-        in = new DataInputStream( byteStream );
-        if ( readUnsignedByte() != id )
-        {
-            throw new IllegalArgumentException( "Wasn't expecting packet id " + Util.hex( id ) );
+    public DefinedPacket(int id, byte[] buf) {
+        byteStream = new ByteArrayInputStream(buf);
+        in = new DataInputStream(byteStream);
+        if (readUnsignedByte() != id) {
+            throw new IllegalArgumentException("Wasn't expecting packet id " + Util.hex(id));
         }
         this.buf = buf;
     }
 
-    public DefinedPacket(int id)
-    {
+    public DefinedPacket(int id) {
         out = ByteStreams.newDataOutput();
-        writeByte( id );
+        writeByte(id);
     }
 
     /**
@@ -56,134 +52,103 @@ public abstract class DefinedPacket implements DataOutput
      * @return the bytes which make up this packet, either the original byte
      * array or the newly written one.
      */
-    public byte[] getPacket()
-    {
+    public byte[] getPacket() {
         return buf == null ? buf = out.toByteArray() : buf;
     }
 
     @Override
-    public void writeUTF(String s)
-    {
-        writeShort( s.length() );
-        writeChars( s );
+    public void writeUTF(String s) {
+        writeShort(s.length());
+        writeChars(s);
     }
 
-    public String readUTF()
-    {
+    public String readUTF() {
         short len = readShort();
-        char[] chars = new char[ len ];
-        for ( int i = 0; i < len; i++ )
-        {
+        char[] chars = new char[len];
+        for (int i = 0; i < len; i++) {
             chars[i] = this.readChar();
         }
-        return new String( chars );
+        return new String(chars);
     }
 
 
-    public long readLong()
-    {
-        try
-        {
+    public long readLong() {
+        try {
             return in.readLong();
-        } catch ( IOException e )
-        {
-            throw new IllegalStateException( e );
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
         }
     }
 
-    public void writeArray(byte[] b)
-    {
-        writeShort( b.length );
-        write( b );
+    public void writeArray(byte[] b) {
+        writeShort(b.length);
+        write(b);
     }
 
-    public byte[] readArray()
-    {
+    public byte[] readArray() {
         short len = readShort();
-        byte[] ret = new byte[ len ];
-        readFully( ret );
+        byte[] ret = new byte[len];
+        readFully(ret);
         return ret;
     }
 
-    public final int available()
-    {
+    public final int available() {
         return byteStream.available();
     }
 
-    public final void readFully(byte b[])
-    {
-        try
-        {
-            in.readFully( b );
-        } catch ( IOException e )
-        {
-            throw new IllegalStateException( e );
+    public final void readFully(byte b[]) {
+        try {
+            in.readFully(b);
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
         }
     }
 
-    public final boolean readBoolean()
-    {
-        try
-        {
+    public final boolean readBoolean() {
+        try {
             return in.readBoolean();
-        } catch ( IOException e )
-        {
-            throw new IllegalStateException( e );
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
         }
     }
 
-    public final byte readByte()
-    {
-        try
-        {
+    public final byte readByte() {
+        try {
             return in.readByte();
-        } catch ( IOException e )
-        {
-            throw new IllegalStateException( e );
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
         }
     }
 
-    public final int readUnsignedByte()
-    {
-        try
-        {
+    public final int readUnsignedByte() {
+        try {
             return in.readUnsignedByte();
-        } catch ( IOException e )
-        {
-            throw new IllegalStateException( e );
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
         }
     }
 
-    public final short readShort()
-    {
-        try
-        {
+    public final short readShort() {
+        try {
             return in.readShort();
-        } catch ( IOException e )
-        {
-            throw new IllegalStateException( e );
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
         }
     }
 
-    public final char readChar()
-    {
-        try
-        {
+    public final char readChar() {
+        try {
             return in.readChar();
-        } catch ( IOException e )
-        {
-            throw new IllegalStateException( e );
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
         }
     }
 
-    public final int readInt()
-    {
-        try
-        {
+    public final int readInt() {
+        try {
             return in.readInt();
-        } catch ( IOException e )
-        {
-            throw new IllegalStateException( e );
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
         }
     }
 
@@ -197,41 +162,36 @@ public abstract class DefinedPacket implements DataOutput
     public abstract String toString();
 
     public abstract void handle(PacketHandler handler) throws Exception;
-    @SuppressWarnings("unchecked")
-    private static Class<? extends DefinedPacket>[] classes = new Class[ 256 ];
-    @SuppressWarnings("unchecked")
-    private static Constructor<? extends DefinedPacket>[] consructors = new Constructor[ 256 ];
 
-    public static DefinedPacket packet(byte[] buf)
-    {
+    @SuppressWarnings("unchecked")
+    private static Class<? extends DefinedPacket>[] classes = new Class[256];
+    @SuppressWarnings("unchecked")
+    private static Constructor<? extends DefinedPacket>[] consructors = new Constructor[256];
+
+    public static DefinedPacket packet(byte[] buf) {
         int id = buf[0] & 0xFF;
         Class<? extends DefinedPacket> clazz = classes[id];
         DefinedPacket ret = null;
-        if ( clazz != null )
-        {
-            try
-            {
+        if (clazz != null) {
+            try {
                 Constructor<? extends DefinedPacket> constructor = consructors[id];
-                if ( constructor == null )
-                {
-                    constructor = clazz.getDeclaredConstructor( byte[].class );
+                if (constructor == null) {
+                    constructor = clazz.getDeclaredConstructor(byte[].class);
                     consructors[id] = constructor;
                 }
 
-                if ( constructor != null )
-                {
-                    ret = constructor.newInstance( buf );
+                if (constructor != null) {
+                    ret = constructor.newInstance(buf);
                 }
-            } catch ( IllegalAccessException | InstantiationException | InvocationTargetException | NoSuchMethodException ex )
-            {
+            } catch (IllegalAccessException | InstantiationException | InvocationTargetException |
+                     NoSuchMethodException ex) {
             }
         }
 
         return ret;
     }
 
-    static
-    {
+    static {
         classes[0x00] = Packet0KeepAlive.class;
         classes[0x01] = Packet1Login.class;
         classes[0x02] = Packet2Handshake.class;

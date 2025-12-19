@@ -7,12 +7,10 @@ import io.netty.handler.codec.MessageToByteEncoder;
 import net.md_5.bungee.packet.DefinedPacket;
 
 @ChannelHandler.Sharable
-public class DefinedPacketEncoder extends MessageToByteEncoder<DefinedPacket>
-{
+public class DefinedPacketEncoder extends MessageToByteEncoder<DefinedPacket> {
 
     @Override
-    protected void encode(ChannelHandlerContext ctx, DefinedPacket msg, ByteBuf out) throws Exception
-    {
-        out.writeBytes( msg.getPacket() );
+    protected void encode(ChannelHandlerContext ctx, DefinedPacket msg, ByteBuf out) throws Exception {
+        out.writeBytes(msg.getPacket());
     }
 }

@@ -12,8 +12,7 @@ import net.md_5.bungee.api.plugin.Event;
 @AllArgsConstructor
 @ToString(callSuper = false)
 @EqualsAndHashCode(callSuper = false)
-public class ServerConnectEvent extends Event
-{
+public class ServerConnectEvent extends Event {
 
     /**
      * Player connecting to a new server.

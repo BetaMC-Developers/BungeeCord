@@ -17,54 +17,47 @@ import net.md_5.bungee.connection.InitialHandler;
 
 import java.util.concurrent.TimeUnit;
 
-public class PipelineUtils
-{
+public class PipelineUtils {
 
-    public static final AttributeKey<ListenerInfo> LISTENER = AttributeKey.valueOf( "ListerInfo" );
-    public static final AttributeKey<UserConnection> USER = AttributeKey.valueOf( "User" );
-    public static final AttributeKey<ServerInfo> TARGET = AttributeKey.valueOf( "Target" );
-    public static final ChannelInitializer<Channel> SERVER_CHILD = new ChannelInitializer<Channel>()
-    {
+    public static final AttributeKey<ListenerInfo> LISTENER = AttributeKey.valueOf("ListerInfo");
+    public static final AttributeKey<UserConnection> USER = AttributeKey.valueOf("User");
+    public static final AttributeKey<ServerInfo> TARGET = AttributeKey.valueOf("Target");
+    public static final ChannelInitializer<Channel> SERVER_CHILD = new ChannelInitializer<Channel>() {
         @Override
-        protected void initChannel(Channel ch) throws Exception
-        {
-            BASE.initChannel( ch );
-            ch.pipeline().get( HandlerBoss.class ).setHandler( new InitialHandler( ProxyServer.getInstance(), ch.attr( LISTENER ).get() ) );
+        protected void initChannel(Channel ch) throws Exception {
+            BASE.initChannel(ch);
+            ch.pipeline().get(HandlerBoss.class).setHandler(new InitialHandler(ProxyServer.getInstance(), ch.attr(LISTENER).get()));
         }
     };
-    public static final ChannelInitializer<Channel> CLIENT = new ChannelInitializer<Channel>()
-    {
+    public static final ChannelInitializer<Channel> CLIENT = new ChannelInitializer<Channel>() {
         @Override
-        protected void initChannel(Channel ch) throws Exception
-        {
-            BASE.initChannel( ch );
-            ch.pipeline().get( HandlerBoss.class ).setHandler( new ServerConnector( ProxyServer.getInstance(), ch.attr( USER ).get(), ch.attr( TARGET ).get() ) );
+        protected void initChannel(Channel ch) throws Exception {
+            BASE.initChannel(ch);
+            ch.pipeline().get(HandlerBoss.class).setHandler(new ServerConnector(ProxyServer.getInstance(), ch.attr(USER).get(), ch.attr(TARGET).get()));
         }
     };
     public static final Base BASE = new Base();
     private static final DefinedPacketEncoder packetEncoder = new DefinedPacketEncoder();
     private static final ByteArrayEncoder arrayEncoder = new ByteArrayEncoder();
 
-    public final static class Base extends ChannelInitializer<Channel>
-    {
+    public final static class Base extends ChannelInitializer<Channel> {
 
         @Override
-        public void initChannel(Channel ch) throws Exception
-        {
-            try
-            {
+        public void initChannel(Channel ch) throws Exception {
+            try {
                 ch.config().setOption(ChannelOption.TCP_NODELAY, true); // BMC - disable nagle's algorithm
-                ch.config().setOption( ChannelOption.IP_TOS, 0x18 );
-            } catch ( ChannelException ex )
-            {
+                ch.config().setOption(ChannelOption.IP_TOS, 0x18);
+            } catch (ChannelException ex) {
                 // IP_TOS is not supported (Windows XP / Windows Server 2003)
             }
             HandlerBoss handlerBoss = new HandlerBoss(); // BMC - instantiate here
-            ch.pipeline().addLast( "timer", new ReadTimeoutHandler( BungeeCord.getInstance().config.getTimeout(), TimeUnit.MILLISECONDS ) );
-            ch.pipeline().addLast( "decoder", new PacketDecoder(handlerBoss) ); // BMC - pass handlerBoss to PacketDecoder
-            ch.pipeline().addLast( "packet-encoder", packetEncoder );
-            ch.pipeline().addLast( "array-encoder", arrayEncoder );
-            ch.pipeline().addLast( "handler", handlerBoss );
+            ch.pipeline().addLast("timer", new ReadTimeoutHandler(BungeeCord.getInstance().config.getTimeout(), TimeUnit.MILLISECONDS));
+            ch.pipeline().addLast("decoder", new PacketDecoder(handlerBoss)); // BMC - pass handlerBoss to PacketDecoder
+            ch.pipeline().addLast("packet-encoder", packetEncoder);
+            ch.pipeline().addLast("array-encoder", arrayEncoder);
+            ch.pipeline().addLast("handler", handlerBoss);
         }
-    };
+    }
+
+    ;
 }

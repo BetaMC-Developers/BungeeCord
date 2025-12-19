@@ -19,8 +19,7 @@ import net.md_5.bungee.packet.PacketHandler;
 import java.util.Queue;
 
 @RequiredArgsConstructor
-public class ServerConnector extends PacketHandler
-{
+public class ServerConnector extends PacketHandler {
 
     private final ProxyServer bungee;
     private Channel ch;
@@ -29,45 +28,39 @@ public class ServerConnector extends PacketHandler
     private State thisState = State.LOGIN;
     private final static int MAGIC_HEADER = 2;
 
-    private enum State
-    {
+    private enum State {
         LOGIN, FINISHED
     }
 
     @Override
-    public void connected(Channel channel) throws Exception
-    {
+    public void connected(Channel channel) throws Exception {
         this.ch = channel;
-        channel.writeAndFlush( user.handshake ); // BMC - writeAndFlush
+        channel.writeAndFlush(user.handshake); // BMC - writeAndFlush
         // IP Forwarding
         boolean flag = BungeeCord.getInstance().config.isIpForwarding();
         long address = flag ? Util.serializeAddress(user.getAddress().getAddress().getHostAddress()) : 0;
         byte header = (byte) (flag ? MAGIC_HEADER : 0);
         // end
-        channel.writeAndFlush(new Packet1Login(BungeeCord.PROTOCOL_VERSION,  user.handshake.username, address, header)); // BMC - writeAndFlush
+        channel.writeAndFlush(new Packet1Login(BungeeCord.PROTOCOL_VERSION, user.handshake.username, address, header)); // BMC - writeAndFlush
     }
 
     @Override
-    public void handle(Packet1Login login) throws Exception
-    {
-        Preconditions.checkState( thisState == State.LOGIN, "Not exepcting LOGIN" );
+    public void handle(Packet1Login login) throws Exception {
+        Preconditions.checkState(thisState == State.LOGIN, "Not exepcting LOGIN");
 
-        ServerConnection server = new ServerConnection( ch, target, login );
-        ServerConnectedEvent event = new ServerConnectedEvent( user, server );
-        bungee.getPluginManager().callEvent( event );
+        ServerConnection server = new ServerConnection(ch, target, login);
+        ServerConnectedEvent event = new ServerConnectedEvent(user, server);
+        bungee.getPluginManager().callEvent(event);
 
         // TODO: Race conditions with many connects
-        Queue<DefinedPacket> packetQueue = ( (BungeeServerInfo) target ).getPacketQueue();
-        while ( !packetQueue.isEmpty() )
-        {
-            ch.writeAndFlush( packetQueue.poll() ); // BMC - writeAndFlush
+        Queue<DefinedPacket> packetQueue = ((BungeeServerInfo) target).getPacketQueue();
+        while (!packetQueue.isEmpty()) {
+            ch.writeAndFlush(packetQueue.poll()); // BMC - writeAndFlush
         }
 
-        synchronized ( user.getSwitchMutex() )
-        {
-            if ( user.getServer() == null )
-            {
-                BungeeCord.getInstance().connections.put( user.getName(), user );
+        synchronized (user.getSwitchMutex()) {
+            if (user.getServer() == null) {
+                BungeeCord.getInstance().connections.put(user.getName(), user);
                 // Once again, first connection
                 user.clientEntityId = login.entityId;
                 user.serverEntityId = login.entityId;
@@ -78,19 +71,18 @@ public class ServerConnector extends PacketHandler
                         login.seed,
                         login.dimension
                 );
-                user.ch.writeAndFlush( modLogin ); // BMC - writeAndFlush
-            } else
-            {
-                byte oppositeDimension = (byte) ( login.dimension >= 0 ? -1 : 0 );
+                user.ch.writeAndFlush(modLogin); // BMC - writeAndFlush
+            } else {
+                byte oppositeDimension = (byte) (login.dimension >= 0 ? -1 : 0);
 
                 user.serverEntityId = login.entityId;
 
-                user.ch.writeAndFlush( new Packet9Respawn( oppositeDimension ) ); // BMC - writeAndFlush
-                user.ch.writeAndFlush( new Packet9Respawn( login.dimension) ); // BMC - writeAndFlush
+                user.ch.writeAndFlush(new Packet9Respawn(oppositeDimension)); // BMC - writeAndFlush
+                user.ch.writeAndFlush(new Packet9Respawn(login.dimension)); // BMC - writeAndFlush
 
                 // Remove from old servers
-                user.getServer().setObsolete( true );
-                user.getServer().disconnect( "Quitting" );
+                user.getServer().setObsolete(true);
+                user.getServer().disconnect("Quitting");
             }
 
             // TODO: Fix this?
@@ -102,10 +94,10 @@ public class ServerConnector extends PacketHandler
 
             // Add to new server
             // TODO: Move this to the connected() method of DownstreamBridge
-            target.addPlayer( user );
+            target.addPlayer(user);
 
-            user.setServer( server );
-            ch.pipeline().get( HandlerBoss.class ).setHandler( new DownstreamBridge( bungee, user, server ) );
+            user.setServer(server);
+            ch.pipeline().get(HandlerBoss.class).setHandler(new DownstreamBridge(bungee, user, server));
         }
 
         thisState = State.FINISHED;
@@ -114,21 +106,17 @@ public class ServerConnector extends PacketHandler
     }
 
     @Override
-    public void handle(PacketFFKick kick) throws Exception
-    {
+    public void handle(PacketFFKick kick) throws Exception {
         String message = ChatColor.RED + "Kicked whilst connecting to " + target.getName() + ": " + kick.message;
-        if ( user.getServer() == null )
-        {
-            user.disconnect( message );
-        } else
-        {
-            user.sendMessage( message );
+        if (user.getServer() == null) {
+            user.disconnect(message);
+        } else {
+            user.sendMessage(message);
         }
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return "[" + user.getName() + "] <-> ServerConnector [" + target.getName() + "]";
     }
 }

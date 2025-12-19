@@ -7,8 +7,7 @@ import net.md_5.bungee.api.config.ServerInfo;
  * Represents a player who's connection is being connected to somewhere else,
  * whether it be a remote or embedded server.
  */
-public interface ProxiedPlayer extends Connection, CommandSender
-{
+public interface ProxiedPlayer extends Connection, CommandSender {
 
     /**
      * Gets this player's display name.
@@ -52,7 +51,7 @@ public interface ProxiedPlayer extends Connection, CommandSender
      * Send a plugin message to this player.
      *
      * @param channel the channel to send this data via
-     * @param data the data to send
+     * @param data    the data to send
      */
     public void sendData(String channel, byte[] data);
 

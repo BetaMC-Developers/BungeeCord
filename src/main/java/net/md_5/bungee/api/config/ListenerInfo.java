@@ -10,8 +10,7 @@ import java.util.Map;
  * multiple listeners on different ports.
  */
 @Data
-public class ListenerInfo
-{
+public class ListenerInfo {
 
     /**
      * Host to bind to.

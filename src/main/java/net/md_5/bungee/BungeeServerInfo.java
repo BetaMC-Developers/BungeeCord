@@ -20,53 +20,43 @@ import java.net.InetSocketAddress;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class BungeeServerInfo extends ServerInfo
-{
+public class BungeeServerInfo extends ServerInfo {
 
     @Getter
     private final Queue<DefinedPacket> packetQueue = new ConcurrentLinkedQueue<>();
 
-    public BungeeServerInfo(String name, InetSocketAddress address, boolean restricted)
-    {
-        super( name, address, restricted );
+    public BungeeServerInfo(String name, InetSocketAddress address, boolean restricted) {
+        super(name, address, restricted);
     }
 
     @Override
-    public void sendData(String channel, byte[] data)
-    {
-        Server server = ProxyServer.getInstance().getServer( getName() );
-        if ( server != null )
-        {
-            server.sendData( channel, data );
-        } else
-        {
+    public void sendData(String channel, byte[] data) {
+        Server server = ProxyServer.getInstance().getServer(getName());
+        if (server != null) {
+            server.sendData(channel, data);
+        } else {
             //packetQueue.add( new PacketFAPluginMessage( channel, data ) );
         }
     }
 
     @Override
-    public void ping(final Callback<ServerPing> callback)
-    {
+    public void ping(final Callback<ServerPing> callback) {
         new Bootstrap()
-                .channel( NioSocketChannel.class )
-                .group( BungeeCord.getInstance().eventLoops )
-                .handler( PipelineUtils.BASE )
-                .option( ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000 ) // TODO: Configurable
-                .remoteAddress( getAddress() )
+                .channel(NioSocketChannel.class)
+                .group(BungeeCord.getInstance().eventLoops)
+                .handler(PipelineUtils.BASE)
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000) // TODO: Configurable
+                .remoteAddress(getAddress())
                 .connect()
-                .addListener( new ChannelFutureListener()
-        {
-            @Override
-            public void operationComplete(ChannelFuture future) throws Exception
-            {
-                if ( future.isSuccess() )
-                {
-                   future.channel().pipeline().get( HandlerBoss.class ).setHandler( new PingHandler( BungeeServerInfo.this, callback ) );
-                } else
-                {
-                    callback.done( null, future.cause() );
-                }
-            }
-        } );
+                .addListener(new ChannelFutureListener() {
+                    @Override
+                    public void operationComplete(ChannelFuture future) throws Exception {
+                        if (future.isSuccess()) {
+                            future.channel().pipeline().get(HandlerBoss.class).setHandler(new PingHandler(BungeeServerInfo.this, callback));
+                        } else {
+                            callback.done(null, future.cause());
+                        }
+                    }
+                });
     }
 }

@@ -9,39 +9,31 @@ import net.md_5.bungee.packet.PacketFFKick;
 import net.md_5.bungee.packet.PacketHandler;
 
 @RequiredArgsConstructor
-public class PingHandler extends PacketHandler
-{
+public class PingHandler extends PacketHandler {
 
     private final ServerInfo target;
     private final Callback<ServerPing> callback;
-    private static final byte[] pingBuf = new byte[]
-    {
-        (byte) 0xFE, (byte) 0x01
-    };
+    private static final byte[] pingBuf = new byte[]{(byte) 0xFE, (byte) 0x01};
 
     @Override
-    public void connected(Channel channel) throws Exception
-    {
-        channel.writeAndFlush( pingBuf ); // BMC - writeAndFlush
+    public void connected(Channel channel) throws Exception {
+        channel.writeAndFlush(pingBuf); // BMC - writeAndFlush
     }
 
     @Override
-    public void exception(Throwable t) throws Exception
-    {
-        callback.done( null, t );
+    public void exception(Throwable t) throws Exception {
+        callback.done(null, t);
     }
 
     @Override
-    public void handle(PacketFFKick kick) throws Exception
-    {
-        String[] split = kick.message.split( "\00" );
-        ServerPing ping = new ServerPing( Byte.parseByte( split[1] ), split[2], split[3], Integer.parseInt( split[4] ), Integer.parseInt( split[5] ) );
-        callback.done( ping, null );
+    public void handle(PacketFFKick kick) throws Exception {
+        String[] split = kick.message.split("\00");
+        ServerPing ping = new ServerPing(Byte.parseByte(split[1]), split[2], split[3], Integer.parseInt(split[4]), Integer.parseInt(split[5]));
+        callback.done(ping, null);
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return "[Ping Handler] -> " + target.getName();
     }
 }

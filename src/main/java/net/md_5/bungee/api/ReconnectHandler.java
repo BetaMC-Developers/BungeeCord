@@ -3,8 +3,7 @@ package net.md_5.bungee.api;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
-public interface ReconnectHandler
-{
+public interface ReconnectHandler {
 
     /**
      * Gets the initial server name for a connecting player.

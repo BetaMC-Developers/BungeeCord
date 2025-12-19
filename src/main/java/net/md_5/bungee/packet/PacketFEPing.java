@@ -5,20 +5,17 @@ import lombok.ToString;
 
 @ToString
 @EqualsAndHashCode(callSuper = false)
-public class PacketFEPing extends DefinedPacket
-{
+public class PacketFEPing extends DefinedPacket {
 
     public byte version;
 
-    PacketFEPing(byte[] buffer)
-    {
-        super( 0xFE, buffer );
+    PacketFEPing(byte[] buffer) {
+        super(0xFE, buffer);
         version = readByte();
     }
 
     @Override
-    public void handle(PacketHandler handler) throws Exception
-    {
-        handler.handle( this );
+    public void handle(PacketHandler handler) throws Exception {
+        handler.handle(this);
     }
 }

@@ -15,8 +15,7 @@ import net.md_5.bungee.api.plugin.Event;
 @AllArgsConstructor
 @ToString(callSuper = false)
 @EqualsAndHashCode(callSuper = false)
-public class ProxyPingEvent extends Event
-{
+public class ProxyPingEvent extends Event {
 
     /**
      * The connection asking for a ping response.

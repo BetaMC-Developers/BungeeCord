@@ -7,8 +7,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Represents a task scheduled for execution by the {@link TaskScheduler}.
  */
-public interface ScheduledTask
-{
+public interface ScheduledTask {
 
     /**
      * Gets the unique ID of this task.

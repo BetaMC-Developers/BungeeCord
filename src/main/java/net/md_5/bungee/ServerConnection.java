@@ -13,8 +13,7 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 
 @RequiredArgsConstructor
-public class ServerConnection implements Server
-{
+public class ServerConnection implements Server {
 
     @Getter
     private final Channel ch;
@@ -27,36 +26,29 @@ public class ServerConnection implements Server
     private boolean isObsolete;
 
     @Override
-    public void sendData(String channel, byte[] data)
-    {
+    public void sendData(String channel, byte[] data) {
         //ch.write( new PacketFAPluginMessage( channel, data ) );
     }
 
     @Override
-    public synchronized void disconnect(String reason)
-    {
-        disconnect( ch, reason );
+    public synchronized void disconnect(String reason) {
+        disconnect(ch, reason);
     }
 
-    static void disconnect(final Channel ch, String reason)
-    {
-        if ( ch.isActive() )
-        {
-            ch.writeAndFlush( new PacketFFKick( reason ) ); // BMC - writeAndFlush
-            ch.eventLoop().schedule( new Runnable()
-            {
+    static void disconnect(final Channel ch, String reason) {
+        if (ch.isActive()) {
+            ch.writeAndFlush(new PacketFFKick(reason)); // BMC - writeAndFlush
+            ch.eventLoop().schedule(new Runnable() {
                 @Override
-                public void run()
-                {
+                public void run() {
                     ch.close();
                 }
-            }, 100, TimeUnit.MILLISECONDS );
+            }, 100, TimeUnit.MILLISECONDS);
         }
     }
 
     @Override
-    public InetSocketAddress getAddress()
-    {
+    public InetSocketAddress getAddress() {
         return getInfo().getAddress();
     }
 }

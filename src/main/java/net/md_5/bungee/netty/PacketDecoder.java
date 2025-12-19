@@ -15,8 +15,7 @@ import java.util.List;
  * It is based on {@link ReplayingDecoder} so that packets will only be returned
  * when all needed data is present.
  */
-public class PacketDecoder extends ReplayingDecoder<Void>
-{
+public class PacketDecoder extends ReplayingDecoder<Void> {
     // BMC start
     private final HandlerBoss handlerBoss;
 
@@ -26,12 +25,12 @@ public class PacketDecoder extends ReplayingDecoder<Void>
     // BMC end
 
     @Override
-    protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception    {
+    protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         int startIndex = in.readerIndex();
         PacketReader.readPacket(in, handlerBoss); // BMC - pass handlerBoss
-        byte[] buf = new byte[ in.readerIndex() - startIndex ];
-        in.readerIndex( startIndex );
-        in.readBytes( buf, 0, buf.length );
-        out.add( buf );
+        byte[] buf = new byte[in.readerIndex() - startIndex];
+        in.readerIndex(startIndex);
+        in.readBytes(buf, 0, buf.length);
+        out.add(buf);
     }
 }

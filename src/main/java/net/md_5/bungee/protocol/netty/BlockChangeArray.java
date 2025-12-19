@@ -7,11 +7,9 @@ import java.io.IOException;
 class BlockChangeArray extends Instruction {
 
     @Override
-    void read(ByteBuf in) throws IOException
-    {
+    void read(ByteBuf in) throws IOException {
         short size = in.readShort();
-        for ( short s = 0; s < size; s++ )
-        {
+        for (short s = 0; s < size; s++) {
             in.readShort();
             in.readByte();
             in.readByte();

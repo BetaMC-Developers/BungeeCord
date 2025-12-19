@@ -32,8 +32,7 @@ import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 
 @RequiredArgsConstructor
-public class InitialHandler extends PacketHandler implements PendingConnection
-{
+public class InitialHandler extends PacketHandler implements PendingConnection {
 
     private final ProxyServer bungee;
     private Channel ch;
@@ -48,30 +47,26 @@ public class InitialHandler extends PacketHandler implements PendingConnection
     private int requestVersion = 14;
     // BMC end
 
-    private enum State
-    {
+    private enum State {
         HANDSHAKE, FINISHED;
     }
 
     @Override
-    public void connected(Channel channel) throws Exception
-    {
+    public void connected(Channel channel) throws Exception {
         this.ch = channel;
     }
 
     @Override
-    public void exception(Throwable t) throws Exception
-    {
-        disconnect( ChatColor.RED + Util.exception( t ) );
+    public void exception(Throwable t) throws Exception {
+        disconnect(ChatColor.RED + Util.exception(t));
     }
 
     @Override
-    public void handle(PacketFEPing ping) throws Exception
-    {
-        ServerPing response = new ServerPing( bungee.getProtocolVersion(), bungee.getGameVersion(),
-                listener.getMotd(), bungee.getPlayers().size(), listener.getMaxPlayers() );
+    public void handle(PacketFEPing ping) throws Exception {
+        ServerPing response = new ServerPing(bungee.getProtocolVersion(), bungee.getGameVersion(),
+                listener.getMotd(), bungee.getPlayers().size(), listener.getMaxPlayers());
 
-        response = bungee.getPluginManager().callEvent( new ProxyPingEvent( this, response ) ).getResponse();
+        response = bungee.getPluginManager().callEvent(new ProxyPingEvent(this, response)).getResponse();
 
         String kickMessage = ChatColor.DARK_BLUE
                 + "\00" + response.getProtocolVersion()
@@ -79,27 +74,26 @@ public class InitialHandler extends PacketHandler implements PendingConnection
                 + "\00" + response.getMotd()
                 + "\00" + response.getCurrentPlayers()
                 + "\00" + response.getMaxPlayers();
-        disconnect( kickMessage );
+        disconnect(kickMessage);
     }
 
     @Override
-    public void handle(Packet2Handshake handshake) throws Exception
-    {
-        Preconditions.checkState( thisState == State.HANDSHAKE, "Not expecting HANDSHAKE" );
-        Preconditions.checkArgument( handshake.username.length() <= 16, "Cannot have username longer than 16 characters" );
+    public void handle(Packet2Handshake handshake) throws Exception {
+        Preconditions.checkState(thisState == State.HANDSHAKE, "Not expecting HANDSHAKE");
+        Preconditions.checkArgument(handshake.username.length() <= 16, "Cannot have username longer than 16 characters");
 
         int limit = BungeeCord.getInstance().config.getPlayerLimit();
-        Preconditions.checkState( limit <= 0 || bungee.getPlayers().size() < limit, "Server is full!" );
+        Preconditions.checkState(limit <= 0 || bungee.getPlayers().size() < limit, "Server is full!");
 
         this.handshake = handshake;
 
-        UserConnection userCon = new UserConnection( (BungeeCord) bungee, ch, this, handshake );
-        bungee.getPluginManager().callEvent( new PostLoginEvent( userCon ) );
+        UserConnection userCon = new UserConnection((BungeeCord) bungee, ch, this, handshake);
+        bungee.getPluginManager().callEvent(new PostLoginEvent(userCon));
 
-        ch.pipeline().get( HandlerBoss.class ).setHandler( new UpstreamBridge( bungee, userCon ) );
+        ch.pipeline().get(HandlerBoss.class).setHandler(new UpstreamBridge(bungee, userCon));
 
-        ServerInfo server = bungee.getReconnectHandler().getServer( userCon );
-        userCon.connect( server, true );
+        ServerInfo server = bungee.getReconnectHandler().getServer(userCon);
+        userCon.connect(server, true);
 
         thisState = State.FINISHED;
         throw new CancelSendSignal();
@@ -172,42 +166,35 @@ public class InitialHandler extends PacketHandler implements PendingConnection
     // BMC end
 
     @Override
-    public synchronized void disconnect(String reason)
-    {
-        if ( ch.isActive() )
-        {
-            ch.writeAndFlush( new PacketFFKick( reason ) ); // BMC - writeAndFlush
+    public synchronized void disconnect(String reason) {
+        if (ch.isActive()) {
+            ch.writeAndFlush(new PacketFFKick(reason)); // BMC - writeAndFlush
             ch.close();
         }
     }
 
     @Override
-    public String getName()
-    {
-        return ( handshake == null ) ? null : handshake.username;
+    public String getName() {
+        return (handshake == null) ? null : handshake.username;
     }
 
     @Override
-    public byte getVersion()
-    {
-        return ( handshake == null ) ? -1 : BungeeCord.PROTOCOL_VERSION;
+    public byte getVersion() {
+        return (handshake == null) ? -1 : BungeeCord.PROTOCOL_VERSION;
     }
 
     @Override
-    public InetSocketAddress getVirtualHost()
-    {
-        return ( handshake == null ) ? null : new InetSocketAddress( "localhost", 1234 );
+    public InetSocketAddress getVirtualHost() {
+        return (handshake == null) ? null : new InetSocketAddress("localhost", 1234);
     }
 
     @Override
-    public InetSocketAddress getAddress()
-    {
+    public InetSocketAddress getAddress() {
         return (InetSocketAddress) ch.remoteAddress();
     }
 
     @Override
-    public String toString()
-    {
-        return "[" + ( ( getName() != null ) ? getName() : getAddress() ) + "] <-> InitialHandler";
+    public String toString() {
+        return "[" + ((getName() != null) ? getName() : getAddress()) + "] <-> InitialHandler";
     }
 }

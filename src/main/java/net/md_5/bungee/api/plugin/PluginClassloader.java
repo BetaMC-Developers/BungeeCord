@@ -5,42 +5,31 @@ import java.net.URLClassLoader;
 import java.util.HashSet;
 import java.util.Set;
 
-public class PluginClassloader extends URLClassLoader
-{
+public class PluginClassloader extends URLClassLoader {
 
     private static final Set<PluginClassloader> allLoaders = new HashSet<>();
 
-    public PluginClassloader(URL[] urls)
-    {
-        super( urls );
-        allLoaders.add( this );
+    public PluginClassloader(URL[] urls) {
+        super(urls);
+        allLoaders.add(this);
     }
 
     @Override
-    protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException
-    {
-        return loadClass0( name, resolve, true );
+    protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+        return loadClass0(name, resolve, true);
     }
 
-    private Class<?> loadClass0(String name, boolean resolve, boolean checkOther) throws ClassNotFoundException
-    {
-        try
-        {
-            return super.loadClass( name, resolve );
-        } catch ( ClassNotFoundException ex )
-        {
+    private Class<?> loadClass0(String name, boolean resolve, boolean checkOther) throws ClassNotFoundException {
+        try {
+            return super.loadClass(name, resolve);
+        } catch (ClassNotFoundException ex) {
         }
-        if ( checkOther )
-        {
-            for ( PluginClassloader loader : allLoaders )
-            {
-                if ( loader != this )
-                {
-                    try
-                    {
-                        return loader.loadClass0( name, resolve, false );
-                    } catch ( ClassNotFoundException ex )
-                    {
+        if (checkOther) {
+            for (PluginClassloader loader : allLoaders) {
+                if (loader != this) {
+                    try {
+                        return loader.loadClass0(name, resolve, false);
+                    } catch (ClassNotFoundException ex) {
                     }
                 }
             }

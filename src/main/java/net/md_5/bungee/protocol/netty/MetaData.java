@@ -4,41 +4,37 @@ import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 
-class MetaData extends Instruction
-{
+class MetaData extends Instruction {
 
     @Override
-    void read(ByteBuf in) throws IOException
-    {
+    void read(ByteBuf in) throws IOException {
         int x = in.readUnsignedByte();
-        while ( x != 127 )
-        {
+        while (x != 127) {
             int type = x >> 5;
-            switch ( type )
-            {
+            switch (type) {
                 case 0:
-                    BYTE.read( in );
+                    BYTE.read(in);
                     break;
                 case 1:
-                    SHORT.read( in );
+                    SHORT.read(in);
                     break;
                 case 2:
-                    INT.read( in );
+                    INT.read(in);
                     break;
                 case 3:
-                    FLOAT.read( in );
+                    FLOAT.read(in);
                     break;
                 case 4:
-                    STRING.read( in );
+                    STRING.read(in);
                     break;
                 case 5:
-                    ITEM.read( in );
+                    ITEM.read(in);
                     break;
                 case 6:
-                    in.skipBytes( 12 ); //  int, int, int
+                    in.skipBytes(12); //  int, int, int
                     break;
                 default:
-                    throw new IllegalArgumentException( "Unknown metadata type " + type );
+                    throw new IllegalArgumentException("Unknown metadata type " + type);
             }
             x = in.readUnsignedByte();
         }

@@ -5,21 +5,19 @@ import lombok.ToString;
 
 @ToString
 @EqualsAndHashCode(callSuper = false)
-public class Packet1Login extends DefinedPacket
-{
+public class Packet1Login extends DefinedPacket {
 
     public int entityId;
     public String username;
     public long seed;
     public byte dimension;
 
-    public Packet1Login(int entityId, String username, long seed, byte dimension)
-    {
-        super( 0x01 );
-        writeInt( entityId );
-        writeUTF( username );
-        writeLong( seed );
-        writeByte( dimension );
+    public Packet1Login(int entityId, String username, long seed, byte dimension) {
+        super(0x01);
+        writeInt(entityId);
+        writeUTF(username);
+        writeLong(seed);
+        writeByte(dimension);
 
         this.entityId = entityId;
         this.username = username;
@@ -36,8 +34,7 @@ public class Packet1Login extends DefinedPacket
     }
 
     @Override
-    public void handle(PacketHandler handler) throws Exception
-    {
-        handler.handle( this );
+    public void handle(PacketHandler handler) throws Exception {
+        handler.handle(this);
     }
 }

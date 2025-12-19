@@ -13,61 +13,49 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PacketReader
-{
+public class PacketReader {
 
-    private static final Instruction[][] instructions = new Instruction[ PacketDefinitions.opCodes.length ][];
+    private static final Instruction[][] instructions = new Instruction[PacketDefinitions.opCodes.length][];
 
-    static
-    {
-        for ( int i = 0; i < instructions.length; i++ )
-        {
+    static {
+        for (int i = 0; i < instructions.length; i++) {
             List<Instruction> output = new ArrayList<>();
 
             OpCode[] enums = PacketDefinitions.opCodes[i];
-            if ( enums != null )
-            {
-                for ( OpCode struct : enums )
-                {
-                    try
-                    {
-                        output.add( (Instruction) Instruction.class.getDeclaredField( struct.name() ).get( null ) );
-                    } catch ( NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex )
-                    {
-                        throw new UnsupportedOperationException( "No definition for " + struct.name() );
+            if (enums != null) {
+                for (OpCode struct : enums) {
+                    try {
+                        output.add((Instruction) Instruction.class.getDeclaredField(struct.name()).get(null));
+                    } catch (NoSuchFieldException | SecurityException | IllegalArgumentException |
+                             IllegalAccessException ex) {
+                        throw new UnsupportedOperationException("No definition for " + struct.name());
                     }
                 }
 
                 List<Instruction> crushed = new ArrayList<>();
                 int nextJumpSize = 0;
-                for ( Instruction child : output )
-                {
-                    if ( child instanceof Jump )
-                    {
-                        nextJumpSize += ( (Jump) child ).len;
-                    } else
-                    {
-                        if ( nextJumpSize != 0 )
-                        {
-                            crushed.add( new Jump( nextJumpSize ) );
+                for (Instruction child : output) {
+                    if (child instanceof Jump) {
+                        nextJumpSize += ((Jump) child).len;
+                    } else {
+                        if (nextJumpSize != 0) {
+                            crushed.add(new Jump(nextJumpSize));
                         }
-                        crushed.add( child );
+                        crushed.add(child);
                         nextJumpSize = 0;
                     }
                 }
-                if ( nextJumpSize != 0 )
-                {
-                    crushed.add( new Jump( nextJumpSize ) );
+                if (nextJumpSize != 0) {
+                    crushed.add(new Jump(nextJumpSize));
                 }
 
-                instructions[i] = crushed.toArray( new Instruction[ crushed.size() ] );
+                instructions[i] = crushed.toArray(new Instruction[crushed.size()]);
             }
         }
     }
 
     // BMC - change signature
-    public static void readPacket(ByteBuf in, HandlerBoss handlerBoss) throws IOException
-    {
+    public static void readPacket(ByteBuf in, HandlerBoss handlerBoss) throws IOException {
         // BMC start
         in.markReaderIndex();
         int packetId = in.readUnsignedByte();
@@ -84,20 +72,17 @@ public class PacketReader
         // BMC end
 
         Instruction[] packetDef = null;
-        if ( packetId < instructions.length )
-        {
+        if (packetId < instructions.length) {
             packetDef = instructions[packetId];
         }
 
-        if ( packetDef == null )
-        {
+        if (packetDef == null) {
             ProxyServer.getInstance().getLogger().info("Unknown packet id " + packetId); // BMC - make less verbose
             return;
         }
 
-        for ( Instruction instruction : packetDef )
-        {
-            instruction.read( in );
+        for (Instruction instruction : packetDef) {
+            instruction.read(in);
         }
     }
 

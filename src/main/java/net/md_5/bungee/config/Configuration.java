@@ -15,8 +15,7 @@ import java.util.UUID;
  * Core configuration for the proxy.
  */
 @Getter
-public class Configuration
-{
+public class Configuration {
     /**
      * Time before users are disconnected due to no network activity.
      */
@@ -37,29 +36,27 @@ public class Configuration
     private String messagingSecret;
     private int playerLimit = -1;
 
-    public void load()
-    {
+    public void load() {
         ConfigurationAdapter adapter = ProxyServer.getInstance().getConfigurationAdapter();
         adapter.load();
 
-        timeout = adapter.getInt( "timeout", timeout );
+        timeout = adapter.getInt("timeout", timeout);
         //uuid = adapter.getString( "stats", uuid ); // BMC - remove stats key
-        playerLimit = adapter.getInt( "player_limit", playerLimit );
+        playerLimit = adapter.getInt("player_limit", playerLimit);
 
-        ipForwarding = adapter.getBoolean( "ip_forward", true );
+        ipForwarding = adapter.getBoolean("ip_forward", true);
 
-        messagingSecret = adapter.getString( "messaging_secret", "change_me" );
-        Preconditions.checkArgument( !messagingSecret.equals("change_me"), "Change 'messaging_secret' to something more unique" );
+        messagingSecret = adapter.getString("messaging_secret", "change_me");
+        Preconditions.checkArgument(!messagingSecret.equals("change_me"), "Change 'messaging_secret' to something more unique");
 
         listeners = adapter.getListeners();
-        Preconditions.checkArgument( listeners != null && !listeners.isEmpty(), "No listeners defined." );
+        Preconditions.checkArgument(listeners != null && !listeners.isEmpty(), "No listeners defined.");
 
         servers = adapter.getServers();
-        Preconditions.checkArgument( servers != null && !servers.isEmpty(), "No servers defined" );
+        Preconditions.checkArgument(servers != null && !servers.isEmpty(), "No servers defined");
 
-        for ( ListenerInfo listener : listeners )
-        {
-            Preconditions.checkArgument( servers.containsKey( listener.getDefaultServer() ) );
+        for (ListenerInfo listener : listeners) {
+            Preconditions.checkArgument(servers.containsKey(listener.getDefaultServer()));
         }
     }
 }

@@ -7,8 +7,7 @@ import lombok.Data;
  * Minecraft client server list, or hitting it with a packet 0xFE.
  */
 @Data
-public class ServerPing
-{
+public class ServerPing {
 
     /**
      * Numeric protocol version supported by the server.

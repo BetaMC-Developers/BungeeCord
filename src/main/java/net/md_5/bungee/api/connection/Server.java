@@ -5,8 +5,7 @@ import net.md_5.bungee.api.config.ServerInfo;
 /**
  * Represents a destination which this proxy might connect to.
  */
-public interface Server extends Connection
-{
+public interface Server extends Connection {
 
     /**
      * Returns the basic information about this server.
@@ -19,7 +18,7 @@ public interface Server extends Connection
      * Send data by any available means to this server.
      *
      * @param channel the channel to send this data via
-     * @param data the data to send
+     * @param data    the data to send
      */
     public abstract void sendData(String channel, byte[] data);
 }

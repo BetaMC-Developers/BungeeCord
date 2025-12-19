@@ -8,8 +8,7 @@ import lombok.Data;
  */
 @Data
 @AllArgsConstructor
-public class PluginDescription
-{
+public class PluginDescription {
 
     /**
      * Friendly name of the plugin.
@@ -28,7 +27,6 @@ public class PluginDescription
      */
     private String author;
 
-    public PluginDescription()
-    {
+    public PluginDescription() {
     }
 }

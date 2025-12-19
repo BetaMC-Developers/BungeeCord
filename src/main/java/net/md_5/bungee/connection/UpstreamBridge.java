@@ -13,72 +13,59 @@ import net.md_5.bungee.packet.Packet3Chat;
 import net.md_5.bungee.packet.PacketHandler;
 
 @RequiredArgsConstructor
-public class UpstreamBridge extends PacketHandler
-{
+public class UpstreamBridge extends PacketHandler {
 
     private final ProxyServer bungee;
     private final UserConnection con;
 
     @Override
-    public void exception(Throwable t) throws Exception
-    {
-        con.disconnect( Util.exception( t ) );
+    public void exception(Throwable t) throws Exception {
+        con.disconnect(Util.exception(t));
     }
 
     @Override
-    public void disconnected(Channel channel) throws Exception
-    {
+    public void disconnected(Channel channel) throws Exception {
         // We lost connection to the client
-        PlayerDisconnectEvent event = new PlayerDisconnectEvent( con );
-        bungee.getPluginManager().callEvent( event );
-        bungee.getPlayers().remove( con );
+        PlayerDisconnectEvent event = new PlayerDisconnectEvent(con);
+        bungee.getPluginManager().callEvent(event);
+        bungee.getPlayers().remove(con);
 
-        if ( con.getServer() != null )
-        {
-            con.getServer().disconnect( "Quitting" );
+        if (con.getServer() != null) {
+            con.getServer().disconnect("Quitting");
         }
     }
 
     @Override
-    public void handle(byte[] buf) throws Exception
-    {
-        EntityMap.rewrite( buf, con.clientEntityId, con.serverEntityId );
-        if ( con.getServer() != null )
-        {
-            con.getServer().getCh().writeAndFlush( buf ); // BMC - writeAndFlush
+    public void handle(byte[] buf) throws Exception {
+        EntityMap.rewrite(buf, con.clientEntityId, con.serverEntityId);
+        if (con.getServer() != null) {
+            con.getServer().getCh().writeAndFlush(buf); // BMC - writeAndFlush
         }
     }
 
     @Override
-    public void handle(Packet0KeepAlive alive) throws Exception
-    {
-        if ( alive.id == con.trackingPingId )
-        {
-            int newPing = (int) ( System.currentTimeMillis() - con.pingTime );
-            con.setPing( newPing );
+    public void handle(Packet0KeepAlive alive) throws Exception {
+        if (alive.id == con.trackingPingId) {
+            int newPing = (int) (System.currentTimeMillis() - con.pingTime);
+            con.setPing(newPing);
         }
     }
 
     @Override
-    public void handle(Packet3Chat chat) throws Exception
-    {
-        ChatEvent chatEvent = new ChatEvent( con, con.getServer(), chat.message );
-        if ( bungee.getPluginManager().callEvent( chatEvent ).isCancelled() )
-        {
+    public void handle(Packet3Chat chat) throws Exception {
+        ChatEvent chatEvent = new ChatEvent(con, con.getServer(), chat.message);
+        if (bungee.getPluginManager().callEvent(chatEvent).isCancelled()) {
             throw new CancelSendSignal();
         }
-        if ( chatEvent.isCommand() )
-        {
-            if ( bungee.getPluginManager().dispatchCommand( con, chat.message.substring( 1 ) ) )
-            {
+        if (chatEvent.isCommand()) {
+            if (bungee.getPluginManager().dispatchCommand(con, chat.message.substring(1))) {
                 throw new CancelSendSignal();
             }
         }
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return "[" + con.getName() + "] -> UpstreamBridge";
     }
 }

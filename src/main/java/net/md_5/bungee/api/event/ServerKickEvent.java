@@ -14,8 +14,7 @@ import net.md_5.bungee.api.plugin.Event;
 @Data
 @ToString(callSuper = false)
 @EqualsAndHashCode(callSuper = false)
-public class ServerKickEvent extends Event implements Cancellable
-{
+public class ServerKickEvent extends Event implements Cancellable {
 
     /**
      * Cancelled status.
@@ -34,8 +33,7 @@ public class ServerKickEvent extends Event implements Cancellable
      */
     private ServerInfo cancelServer;
 
-    public ServerKickEvent(ProxiedPlayer player, String kickReason, ServerInfo cancelServer)
-    {
+    public ServerKickEvent(ProxiedPlayer player, String kickReason, ServerInfo cancelServer) {
         this.player = player;
         this.kickReason = kickReason;
         this.cancelServer = cancelServer;

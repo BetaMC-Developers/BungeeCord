@@ -4,13 +4,11 @@ import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 
-class UnsignedShortByte extends Instruction
-{
+class UnsignedShortByte extends Instruction {
 
     @Override
-    void read(ByteBuf in) throws IOException
-    {
+    void read(ByteBuf in) throws IOException {
         int size = in.readUnsignedShort();
-        in.skipBytes( size );
+        in.skipBytes(size);
     }
 }

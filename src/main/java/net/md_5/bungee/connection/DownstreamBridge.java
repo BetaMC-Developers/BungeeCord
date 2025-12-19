@@ -21,79 +21,65 @@ import net.md_5.bungee.packet.PacketFFKick;
 import net.md_5.bungee.packet.PacketHandler;
 
 @RequiredArgsConstructor
-public class DownstreamBridge extends PacketHandler
-{
+public class DownstreamBridge extends PacketHandler {
 
     private final ProxyServer bungee;
     private final UserConnection con;
     private final ServerConnection server;
 
     @Override
-    public void exception(Throwable t) throws Exception
-    {
-        ServerInfo def = bungee.getServerInfo( con.getPendingConnection().getListener().getDefaultServer() );
-        if ( server.getInfo() != def )
-        {
-            con.connectNow( def );
-            con.sendMessage( ChatColor.RED + "The server you were previously on went down, you have been connected to the lobby" );
-        } else
-        {
-            con.disconnect( Util.exception( t ) );
+    public void exception(Throwable t) throws Exception {
+        ServerInfo def = bungee.getServerInfo(con.getPendingConnection().getListener().getDefaultServer());
+        if (server.getInfo() != def) {
+            con.connectNow(def);
+            con.sendMessage(ChatColor.RED + "The server you were previously on went down, you have been connected to the lobby");
+        } else {
+            con.disconnect(Util.exception(t));
         }
     }
 
     @Override
-    public void disconnected(Channel channel) throws Exception
-    {
+    public void disconnected(Channel channel) throws Exception {
         // We lost connection to the server
-        server.getInfo().removePlayer( con );
-        bungee.getReconnectHandler().setServer( con );
+        server.getInfo().removePlayer(con);
+        bungee.getReconnectHandler().setServer(con);
 
-        if ( !server.isObsolete() )
-        {
-            con.disconnect( "[Proxy] Lost connection to server D:" );
+        if (!server.isObsolete()) {
+            con.disconnect("[Proxy] Lost connection to server D:");
         }
     }
 
     @Override
-    public void handle(byte[] buf) throws Exception
-    {
-        EntityMap.rewrite( buf, con.serverEntityId, con.clientEntityId );
-        con.ch.writeAndFlush( buf ); // BMC - writeAndFlush
+    public void handle(byte[] buf) throws Exception {
+        EntityMap.rewrite(buf, con.serverEntityId, con.clientEntityId);
+        con.ch.writeAndFlush(buf); // BMC - writeAndFlush
     }
 
     @Override
-    public void handle(Packet0KeepAlive alive) throws Exception
-    {
+    public void handle(Packet0KeepAlive alive) throws Exception {
         con.trackingPingId = alive.id;
     }
 
     @Override
-    public void handle(Packet3Chat chat) throws Exception
-    {
-        ChatEvent chatEvent = new ChatEvent( con.getServer(), con, chat.message );
-        bungee.getPluginManager().callEvent( chatEvent );
+    public void handle(Packet3Chat chat) throws Exception {
+        ChatEvent chatEvent = new ChatEvent(con.getServer(), con, chat.message);
+        bungee.getPluginManager().callEvent(chatEvent);
 
-        if ( chatEvent.isCancelled() )
-        {
+        if (chatEvent.isCancelled()) {
             throw new CancelSendSignal();
         }
 
-        MessageData data = MessagingHandler.handleServerSpecialMessage( BungeeCord.getInstance().config.getMessagingSecret(), chat.message );
-        if ( data != null )
-        {
-            if ( !con.handshake.username.equals( data.getUsername() ) )
-            {
+        MessageData data = MessagingHandler.handleServerSpecialMessage(BungeeCord.getInstance().config.getMessagingSecret(), chat.message);
+        if (data != null) {
+            if (!con.handshake.username.equals(data.getUsername())) {
                 return;
             }
 
-            ProxiedPlayer player = bungee.getPlayer( data.getUsername() );
-            if ( player != null )
-            {
-                ServerInfo targetServer = bungee.getServerInfo( data.getTargetServer() );
-                if ( targetServer != null )
-                {
-                    player.connect( targetServer );
+            ProxiedPlayer player = bungee.getPlayer(data.getUsername());
+            if (player != null) {
+                ServerInfo targetServer = bungee.getServerInfo(data.getTargetServer());
+                if (targetServer != null) {
+                    player.connect(targetServer);
                 }
             }
             throw new CancelSendSignal();
@@ -101,27 +87,22 @@ public class DownstreamBridge extends PacketHandler
     }
 
     @Override
-    public void handle(PacketFFKick kick) throws Exception
-    {
-        ServerInfo def = bungee.getServerInfo( con.getPendingConnection().getListener().getDefaultServer() );
-        if ( server.getInfo() == def )
-        {
+    public void handle(PacketFFKick kick) throws Exception {
+        ServerInfo def = bungee.getServerInfo(con.getPendingConnection().getListener().getDefaultServer());
+        if (server.getInfo() == def) {
             def = null;
         }
-        ServerKickEvent event = bungee.getPluginManager().callEvent( new ServerKickEvent( con, kick.message, def ) );
-        if ( event.isCancelled() && event.getCancelServer() != null )
-        {
-            con.connectNow( event.getCancelServer() );
-        } else
-        {
-            con.disconnect( event.getKickReason() );
+        ServerKickEvent event = bungee.getPluginManager().callEvent(new ServerKickEvent(con, kick.message, def));
+        if (event.isCancelled() && event.getCancelServer() != null) {
+            con.connectNow(event.getCancelServer());
+        } else {
+            con.disconnect(event.getKickReason());
         }
         throw new CancelSendSignal();
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return "[" + con.getName() + "] <-> DownstreamBridge <-> [" + server.getInfo().getName() + "]";
     }
 }

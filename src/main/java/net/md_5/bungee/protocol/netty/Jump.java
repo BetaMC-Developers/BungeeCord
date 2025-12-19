@@ -4,23 +4,19 @@ import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 
-class Jump extends Instruction
-{
+class Jump extends Instruction {
 
     final int len;
 
-    Jump(int len)
-    {
-        if ( len < 0 )
-        {
+    Jump(int len) {
+        if (len < 0) {
             throw new IndexOutOfBoundsException();
         }
         this.len = len;
     }
 
     @Override
-    void read(ByteBuf in) throws IOException
-    {
-        in.skipBytes( len );
+    void read(ByteBuf in) throws IOException {
+        in.skipBytes(len);
     }
 }

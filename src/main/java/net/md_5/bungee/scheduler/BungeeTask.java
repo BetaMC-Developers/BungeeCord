@@ -10,8 +10,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 @Data
-public class BungeeTask implements ScheduledTask
-{
+public class BungeeTask implements ScheduledTask {
 
     private final int id;
     private final Plugin owner;
@@ -20,13 +19,11 @@ public class BungeeTask implements ScheduledTask
     private ScheduledFuture<?> future;
 
     @Override
-    public long getDelay(TimeUnit unit)
-    {
-        return future.getDelay( unit );
+    public long getDelay(TimeUnit unit) {
+        return future.getDelay(unit);
     }
 
-    BungeeTask setFuture(ScheduledFuture<?> future)
-    {
+    BungeeTask setFuture(ScheduledFuture<?> future) {
         this.future = future;
         return this;
     }

@@ -6,8 +6,7 @@ import lombok.Data;
  * Represents an objective entry.
  */
 @Data
-public class Objective
-{
+public class Objective {
 
     /**
      * Name of the objective.

@@ -17,12 +17,10 @@ import static net.md_5.bungee.protocol.PacketDefinitions.OpCode.SHORT_ITEM;
 import static net.md_5.bungee.protocol.PacketDefinitions.OpCode.STRING;
 import static net.md_5.bungee.protocol.PacketDefinitions.OpCode.BYTE_BYTE;
 
-public class PacketDefinitions
-{
-    public static final OpCode[][] opCodes = new OpCode[ 256 ][];
+public class PacketDefinitions {
+    public static final OpCode[][] opCodes = new OpCode[256][];
 
-    public enum OpCode
-    {
+    public enum OpCode {
         BYTE, DOUBLE, FLOAT, INT, INT_3, INT_BYTE, ITEM, LONG, METADATA,
         OPTIONAL_MOTION, SHORT, SHORT_BYTE, SHORT_ITEM, STRING, BLOCK_CHANGE_ARRAY, BYTE_BYTE
     }

@@ -20,22 +20,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Data
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-public class AsyncEvent extends Event
-{
+public class AsyncEvent extends Event {
 
     private final Callback done;
-    private final Set<Plugin> intents = Collections.newSetFromMap( new ConcurrentHashMap<Plugin, Boolean>() );
+    private final Set<Plugin> intents = Collections.newSetFromMap(new ConcurrentHashMap<Plugin, Boolean>());
     private final AtomicBoolean fired = new AtomicBoolean();
     private final AtomicInteger latch = new AtomicInteger();
 
     @Override
     @SuppressWarnings("unchecked")
-    public void postCall()
-    {
-        fired.set( true );
-        if ( latch.get() == 0 )
-        {
-            done.done( this, null );
+    public void postCall() {
+        fired.set(true);
+        if (latch.get() == 0) {
+            done.done(this, null);
         }
     }
 
@@ -46,12 +43,11 @@ public class AsyncEvent extends Event
      *
      * @param plugin the plugin registering this intent
      */
-    public void registerIntent(Plugin plugin)
-    {
-        Preconditions.checkState( !fired.get(), "Event %s has already been fired", this );
-        Preconditions.checkState( !intents.contains( plugin ), "Plugin %s already registered intent for event %s", plugin, this );
+    public void registerIntent(Plugin plugin) {
+        Preconditions.checkState(!fired.get(), "Event %s has already been fired", this);
+        Preconditions.checkState(!intents.contains(plugin), "Plugin %s already registered intent for event %s", plugin, this);
 
-        intents.add( plugin );
+        intents.add(plugin);
     }
 
     /**
@@ -61,13 +57,11 @@ public class AsyncEvent extends Event
      * @param plugin a plugin which has an intent registered for this evemt
      */
     @SuppressWarnings("unchecked")
-    public void completeIntent(Plugin plugin)
-    {
-        Preconditions.checkState( intents.contains( plugin ), "Plugin %s has not registered intent for event %s", plugin, this );
-        intents.remove( plugin );
-        if ( latch.decrementAndGet() == 0 )
-        {
-            done.done( this, null );
+    public void completeIntent(Plugin plugin) {
+        Preconditions.checkState(intents.contains(plugin), "Plugin %s has not registered intent for event %s", plugin, this);
+        intents.remove(plugin);
+        if (latch.decrementAndGet() == 0) {
+            done.done(this, null);
         }
     }
 }

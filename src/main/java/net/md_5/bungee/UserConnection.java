@@ -34,8 +34,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.logging.Level;
 
-public final class UserConnection implements ProxiedPlayer
-{
+public final class UserConnection implements ProxiedPlayer {
 
     public final Packet2Handshake handshake;
     private final ProxyServer bungee;
@@ -66,8 +65,7 @@ public final class UserConnection implements ProxiedPlayer
     @Getter
     private final Object switchMutex = new Object();
 
-    public UserConnection(BungeeCord bungee, Channel channel, PendingConnection pendingConnection, Packet2Handshake handshake)
-    {
+    public UserConnection(BungeeCord bungee, Channel channel, PendingConnection pendingConnection, Packet2Handshake handshake) {
         this.bungee = bungee;
         this.ch = channel;
         this.handshake = handshake;
@@ -75,33 +73,27 @@ public final class UserConnection implements ProxiedPlayer
         this.name = handshake.username;
         this.displayName = name;
 
-        Collection<String> g = bungee.getConfigurationAdapter().getGroups( name );
-        for ( String s : g )
-        {
-            addGroups( s );
+        Collection<String> g = bungee.getConfigurationAdapter().getGroups(name);
+        for (String s : g) {
+            addGroups(s);
         }
     }
 
-    public void sendPacket(DefinedPacket p)
-    {
-        ch.writeAndFlush( p ); // BMC - writeAndFlush
+    public void sendPacket(DefinedPacket p) {
+        ch.writeAndFlush(p); // BMC - writeAndFlush
     }
 
     @Override
-    public void setDisplayName(String name)
-    {
-        Preconditions.checkArgument( name.length() <= 16, "Display name cannot be longer than 16 characters" );
+    public void setDisplayName(String name) {
+        Preconditions.checkArgument(name.length() <= 16, "Display name cannot be longer than 16 characters");
     }
 
     @Override
-    public void connect(ServerInfo target)
-    {
-        if ( getServer() == null || getServer().getInfo() == target )
-        {
-            sendMessage( ChatColor.RED + "Cannot connect to server you are already on!" );
-        } else
-        {
-            connect( target, false );
+    public void connect(ServerInfo target) {
+        if (getServer() == null || getServer().getInfo() == target) {
+            sendMessage(ChatColor.RED + "Cannot connect to server you are already on!");
+        } else {
+            connect(target, false);
         }
     }
 
@@ -110,156 +102,126 @@ public final class UserConnection implements ProxiedPlayer
 
     }
 
-    public void connectNow(ServerInfo target)
-    {
-        ch.writeAndFlush( Packet9Respawn.DIM1_SWITCH ); // BMC - writeAndFlush
-        ch.writeAndFlush( Packet9Respawn.DIM2_SWITCH ); // BMC - writeAndFlush
-        connect( target );
+    public void connectNow(ServerInfo target) {
+        ch.writeAndFlush(Packet9Respawn.DIM1_SWITCH); // BMC - writeAndFlush
+        ch.writeAndFlush(Packet9Respawn.DIM2_SWITCH); // BMC - writeAndFlush
+        connect(target);
     }
 
-    public void connect(ServerInfo info, final boolean retry)
-    {
-        ServerConnectEvent event = new ServerConnectEvent( this, info );
-        ProxyServer.getInstance().getPluginManager().callEvent( event );
+    public void connect(ServerInfo info, final boolean retry) {
+        ServerConnectEvent event = new ServerConnectEvent(this, info);
+        ProxyServer.getInstance().getPluginManager().callEvent(event);
         final ServerInfo target = event.getTarget(); // Update in case the event changed target
         new Bootstrap()
                 // BMC - use Epoll I/O if it's available
                 .channel(Epoll.isAvailable() ? EpollSocketChannel.class : NioSocketChannel.class)
-                .group( BungeeCord.getInstance().eventLoops )
-                .handler( new ChannelInitializer()
-        {
-            @Override
-            protected void initChannel(Channel ch) throws Exception
-            {
-                PipelineUtils.BASE.initChannel( ch );
-                ch.pipeline().get( HandlerBoss.class ).setHandler( new ServerConnector( bungee, UserConnection.this, target ) );
-            }
-        } )
-                .option( ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000 ) // TODO: Configurable
-                .remoteAddress( target.getAddress() )
-                .connect().addListener( new ChannelFutureListener()
-        {
-            @Override
-            public void operationComplete(ChannelFuture future) throws Exception
-            {
-                if ( !future.isSuccess() )
-                {
-                    future.channel().close();
-                    ServerInfo def = ProxyServer.getInstance().getServers().get( getPendingConnection().getListener().getDefaultServer() );
-                    if ( retry && !target.equals( def ) )
-                    {
-                        sendMessage( ChatColor.RED + "Could not connect to target server, you have been moved to the default server" );
-                        connect( def, false );
-                    } else
-                    {
-                        if ( server == null )
-                        {
-                            disconnect( "Could not connect to default server, please try again later: " + future.cause().getClass().getName() );
-                        } else
-                        {
-                            sendMessage( ChatColor.RED + "Could not connect to selected server, please try again later: " + future.cause().getClass().getName() );
+                .group(BungeeCord.getInstance().eventLoops)
+                .handler(new ChannelInitializer() {
+                    @Override
+                    protected void initChannel(Channel ch) throws Exception {
+                        PipelineUtils.BASE.initChannel(ch);
+                        ch.pipeline().get(HandlerBoss.class).setHandler(new ServerConnector(bungee, UserConnection.this, target));
+                    }
+                })
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000) // TODO: Configurable
+                .remoteAddress(target.getAddress())
+                .connect().addListener(new ChannelFutureListener() {
+                    @Override
+                    public void operationComplete(ChannelFuture future) throws Exception {
+                        if (!future.isSuccess()) {
+                            future.channel().close();
+                            ServerInfo def = ProxyServer.getInstance().getServers().get(getPendingConnection().getListener().getDefaultServer());
+                            if (retry && !target.equals(def)) {
+                                sendMessage(ChatColor.RED + "Could not connect to target server, you have been moved to the default server");
+                                connect(def, false);
+                            } else {
+                                if (server == null) {
+                                    disconnect("Could not connect to default server, please try again later: " + future.cause().getClass().getName());
+                                } else {
+                                    sendMessage(ChatColor.RED + "Could not connect to selected server, please try again later: " + future.cause().getClass().getName());
+                                }
+                            }
                         }
                     }
-                }
-            }
-        } );
+                });
     }
 
     @Override
-    public synchronized void disconnect(String reason)
-    {
-        if ( ch.isActive() )
-        {
-            bungee.getLogger().log( Level.INFO, "[" + getName() + "] disconnected with: " + reason );
-            ch.writeAndFlush( new PacketFFKick( reason ) ); // BMC - writeAndFlush
+    public synchronized void disconnect(String reason) {
+        if (ch.isActive()) {
+            bungee.getLogger().log(Level.INFO, "[" + getName() + "] disconnected with: " + reason);
+            ch.writeAndFlush(new PacketFFKick(reason)); // BMC - writeAndFlush
             ch.close();
-            if ( server != null )
-            {
-                server.disconnect( "Quitting" );
+            if (server != null) {
+                server.disconnect("Quitting");
             }
         }
     }
 
     @Override
-    public void chat(String message)
-    {
-        Preconditions.checkState( server != null, "Not connected to server" );
-        server.getCh().writeAndFlush( new Packet3Chat( message ) ); // BMC - writeAndFlush
+    public void chat(String message) {
+        Preconditions.checkState(server != null, "Not connected to server");
+        server.getCh().writeAndFlush(new Packet3Chat(message)); // BMC - writeAndFlush
     }
 
     @Override
-    public void sendMessage(String message)
-    {
-        ch.writeAndFlush( new Packet3Chat( message ) ); // BMC - writeAndFlush
+    public void sendMessage(String message) {
+        ch.writeAndFlush(new Packet3Chat(message)); // BMC - writeAndFlush
     }
 
     @Override
-    public void sendMessages(String... messages)
-    {
-        for ( String message : messages )
-        {
-            sendMessage( message );
+    public void sendMessages(String... messages) {
+        for (String message : messages) {
+            sendMessage(message);
         }
     }
 
     @Override
-    public InetSocketAddress getAddress()
-    {
+    public InetSocketAddress getAddress() {
         return (InetSocketAddress) ch.remoteAddress();
     }
 
     @Override
     @Synchronized("permMutex")
-    public Collection<String> getGroups()
-    {
-        return Collections.unmodifiableCollection( playerGroups );
+    public Collection<String> getGroups() {
+        return Collections.unmodifiableCollection(playerGroups);
     }
 
     @Override
     @Synchronized("permMutex")
-    public void addGroups(String... groups)
-    {
-        for ( String group : groups )
-        {
-            playerGroups.add( group );
-            for ( String permission : bungee.getConfigurationAdapter().getPermissions( group ) )
-            {
-                setPermission( permission, true );
+    public void addGroups(String... groups) {
+        for (String group : groups) {
+            playerGroups.add(group);
+            for (String permission : bungee.getConfigurationAdapter().getPermissions(group)) {
+                setPermission(permission, true);
             }
         }
     }
 
     @Override
     @Synchronized("permMutex")
-    public void removeGroups(String... groups)
-    {
-        for ( String group : groups )
-        {
-            playerGroups.remove( group );
-            for ( String permission : bungee.getConfigurationAdapter().getPermissions( group ) )
-            {
-                setPermission( permission, false );
+    public void removeGroups(String... groups) {
+        for (String group : groups) {
+            playerGroups.remove(group);
+            for (String permission : bungee.getConfigurationAdapter().getPermissions(group)) {
+                setPermission(permission, false);
             }
         }
     }
 
     @Override
     @Synchronized("permMutex")
-    public boolean hasPermission(String permission)
-    {
-        return permissions.contains( permission );
+    public boolean hasPermission(String permission) {
+        return permissions.contains(permission);
     }
 
     @Override
     @Synchronized("permMutex")
-    public void setPermission(String permission, boolean value)
-    {
-        if ( value )
-        {
-            permissions.add( permission );
-        } else
-        {
-            permissions.remove( permission );
+    public void setPermission(String permission, boolean value) {
+        if (value) {
+            permissions.add(permission);
+        } else {
+            permissions.remove(permission);
         }
     }
 }

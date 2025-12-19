@@ -13,8 +13,7 @@ import net.md_5.bungee.api.plugin.Event;
 @Data
 @ToString(callSuper = false)
 @EqualsAndHashCode(callSuper = false)
-public class LoginEvent extends Event implements Cancellable
-{
+public class LoginEvent extends Event implements Cancellable {
 
     /**
      * Cancelled state.

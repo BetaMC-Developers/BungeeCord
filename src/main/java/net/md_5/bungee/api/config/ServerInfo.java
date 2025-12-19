@@ -17,8 +17,7 @@ import java.util.Collections;
  */
 @Data
 @AllArgsConstructor
-public abstract class ServerInfo
-{
+public abstract class ServerInfo {
 
     /**
      * Name this server displays as.
@@ -43,9 +42,8 @@ public abstract class ServerInfo
      * @param player the player to add
      */
     @Synchronized("players")
-    public void addPlayer(ProxiedPlayer player)
-    {
-        players.add( player );
+    public void addPlayer(ProxiedPlayer player) {
+        players.add(player);
     }
 
     /**
@@ -54,9 +52,8 @@ public abstract class ServerInfo
      * @param player the player to remove
      */
     @Synchronized("players")
-    public void removePlayer(ProxiedPlayer player)
-    {
-        players.remove( player );
+    public void removePlayer(ProxiedPlayer player) {
+        players.remove(player);
     }
 
     /**
@@ -65,16 +62,15 @@ public abstract class ServerInfo
      * @return an unmodifiable collection of all players on this server
      */
     @Synchronized("players")
-    public Collection<ProxiedPlayer> getPlayers()
-    {
-        return Collections.unmodifiableCollection( players );
+    public Collection<ProxiedPlayer> getPlayers() {
+        return Collections.unmodifiableCollection(players);
     }
 
     /**
      * Send data by any available means to this server.
      *
      * @param channel the channel to send this data via
-     * @param data the data to send
+     * @param data    the data to send
      */
     public abstract void sendData(String channel, byte[] data);
 
@@ -92,8 +88,7 @@ public abstract class ServerInfo
      * @param player the player to check access for
      * @return whether access is granted to this server
      */
-    public boolean canAccess(ProxiedPlayer player)
-    {
-        return !restricted || player.hasPermission( "bungeecord.server." + name );
+    public boolean canAccess(ProxiedPlayer player) {
+        return !restricted || player.hasPermission("bungeecord.server." + name);
     }
 }

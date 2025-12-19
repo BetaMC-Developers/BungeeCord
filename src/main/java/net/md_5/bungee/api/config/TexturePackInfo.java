@@ -3,8 +3,7 @@ package net.md_5.bungee.api.config;
 import lombok.Data;
 
 @Data
-public class TexturePackInfo
-{
+public class TexturePackInfo {
 
     /**
      * The URL of the texture pack.

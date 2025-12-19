@@ -4,16 +4,13 @@ import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 
-class OptionalMotion extends Instruction
-{
+class OptionalMotion extends Instruction {
 
     @Override
-    void read(ByteBuf in) throws IOException
-    {
+    void read(ByteBuf in) throws IOException {
         int data = in.readInt();
-        if ( data > 0 )
-        {
-            in.skipBytes( 6 );
+        if (data > 0) {
+            in.skipBytes(6);
         }
     }
 }
