@@ -148,6 +148,7 @@ public final class UserConnection implements ProxiedPlayer {
 
     @Override
     public synchronized void disconnect(String reason) {
+        reason = reason.substring(0, Math.min(reason.length(), 100)); // BMC - truncate to 100 characters
         if (ch.isActive()) {
             bungee.getLogger().log(Level.INFO, "[" + getName() + "] disconnected with: " + reason);
             ch.writeAndFlush(new PacketFFKick(reason)); // BMC - writeAndFlush

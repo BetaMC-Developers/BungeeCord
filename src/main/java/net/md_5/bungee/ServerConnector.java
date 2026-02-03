@@ -119,11 +119,11 @@ public class ServerConnector extends PacketHandler {
 
     @Override
     public void handle(PacketFFKick kick) throws Exception {
-        String message = ChatColor.RED + "Kicked whilst connecting to " + target.getName() + ": " + kick.message;
+        // BMC - only send raw message when being disconnected
         if (user.getServer() == null) {
-            user.disconnect(message);
+            user.disconnect(kick.message);
         } else {
-            user.sendMessage(message);
+            user.sendMessage(ChatColor.RED + "Kicked whilst connecting to " + target.getName() + ": " + kick.message);
         }
     }
 
