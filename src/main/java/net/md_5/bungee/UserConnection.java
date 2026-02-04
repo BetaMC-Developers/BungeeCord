@@ -24,6 +24,7 @@ import net.md_5.bungee.api.event.ServerConnectEvent;
 import net.md_5.bungee.netty.HandlerBoss;
 import net.md_5.bungee.netty.PipelineUtils;
 import net.md_5.bungee.packet.DefinedPacket;
+import net.md_5.bungee.packet.Packet1Login;
 import net.md_5.bungee.packet.Packet2Handshake;
 import net.md_5.bungee.packet.Packet3Chat;
 import net.md_5.bungee.packet.Packet9Respawn;
@@ -37,6 +38,7 @@ import java.util.logging.Level;
 public final class UserConnection implements ProxiedPlayer {
 
     public final Packet2Handshake handshake;
+    public final Packet1Login login; // BMC
     private final ProxyServer bungee;
     public final Channel ch;
     @Getter
@@ -65,12 +67,14 @@ public final class UserConnection implements ProxiedPlayer {
     @Getter
     private final Object switchMutex = new Object();
 
-    public UserConnection(BungeeCord bungee, Channel channel, PendingConnection pendingConnection, Packet2Handshake handshake) {
+    // BMC - add login
+    public UserConnection(BungeeCord bungee, Channel channel, PendingConnection pendingConnection, Packet2Handshake handshake, Packet1Login login) {
         this.bungee = bungee;
         this.ch = channel;
         this.handshake = handshake;
+        this.login = login;
         this.pendingConnection = pendingConnection;
-        this.name = handshake.username;
+        this.name = login.username; // BMC - handshake.username -> login.username
         this.displayName = name;
 
         Collection<String> g = bungee.getConfigurationAdapter().getGroups(name);

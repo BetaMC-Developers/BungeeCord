@@ -41,7 +41,9 @@ public class ServerConnector extends PacketHandler {
         long address = flag ? Util.serializeAddress(user.getAddress().getAddress().getHostAddress()) : 0;
         byte header = (byte) (flag ? MAGIC_HEADER : 0);
         // end
-        channel.writeAndFlush(new Packet1Login(BungeeCord.PROTOCOL_VERSION, user.handshake.username, address, header)); // BMC - writeAndFlush
+
+        // BMC - writeAndFlush, handshake -> login
+        channel.writeAndFlush(new Packet1Login(BungeeCord.PROTOCOL_VERSION, user.login.username, address, header));
     }
 
     @Override

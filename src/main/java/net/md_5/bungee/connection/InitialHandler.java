@@ -20,6 +20,7 @@ import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.event.ProxyPingEvent;
 import net.md_5.bungee.netty.HandlerBoss;
+import net.md_5.bungee.packet.Packet1Login;
 import net.md_5.bungee.packet.Packet2Handshake;
 import net.md_5.bungee.packet.PacketFEPing;
 import net.md_5.bungee.packet.PacketFFKick;
@@ -30,14 +31,18 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.Random;
 
 @RequiredArgsConstructor
 public class InitialHandler extends PacketHandler implements PendingConnection {
+
+    private static final Random random = new Random(); // BMC
 
     private final ProxyServer bungee;
     private Channel ch;
     @Getter
     private final ListenerInfo listener;
+    private String serverId = ""; // BMC
     private Packet2Handshake handshake;
     private State thisState = State.HANDSHAKE;
 
@@ -48,7 +53,9 @@ public class InitialHandler extends PacketHandler implements PendingConnection {
     // BMC end
 
     private enum State {
-        HANDSHAKE, FINISHED;
+        HANDSHAKE,
+        LOGIN, // BMC
+        FINISHED
     }
 
     @Override
@@ -80,14 +87,32 @@ public class InitialHandler extends PacketHandler implements PendingConnection {
     @Override
     public void handle(Packet2Handshake handshake) throws Exception {
         Preconditions.checkState(thisState == State.HANDSHAKE, "Not expecting HANDSHAKE");
-        Preconditions.checkArgument(handshake.username.length() <= 16, "Cannot have username longer than 16 characters");
+        // BMC - correctly limit length of handshake username
+        Preconditions.checkArgument(handshake.username.length() <= 32, "Handshake username cannot be longer than 32 characters");
 
         int limit = BungeeCord.getInstance().config.getPlayerLimit();
         Preconditions.checkState(limit <= 0 || bungee.getPlayers().size() < limit, "Server is full!");
 
         this.handshake = handshake;
 
-        UserConnection userCon = new UserConnection((BungeeCord) bungee, ch, this, handshake);
+        // BMC start - restore online mode
+        if (BungeeCord.getInstance().config.isOnlineMode()) {
+            this.serverId = Long.toHexString(random.nextLong());
+            this.ch.writeAndFlush(new Packet2Handshake(this.serverId));
+        } else {
+            this.ch.writeAndFlush(new Packet2Handshake("-"));
+        }
+
+        thisState = State.LOGIN;
+        throw new CancelSendSignal();
+    }
+
+    @Override
+    public void handle(Packet1Login login) throws Exception {
+        Preconditions.checkState(thisState == State.LOGIN, "Not expecting LOGIN");
+        Preconditions.checkArgument(login.username.length() <= 16, "Login username cannot be longer than 16 characters");
+
+        UserConnection userCon = new UserConnection((BungeeCord) bungee, ch, this, handshake, login);
         bungee.getPluginManager().callEvent(new PostLoginEvent(userCon));
 
         ch.pipeline().get(HandlerBoss.class).setHandler(new UpstreamBridge(bungee, userCon));
@@ -98,6 +123,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection {
         thisState = State.FINISHED;
         throw new CancelSendSignal();
     }
+    // BMC end
 
     // BMC start - modern query protocol
     public void handleQuery(ByteBufInputStream in) {

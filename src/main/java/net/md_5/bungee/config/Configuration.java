@@ -32,6 +32,7 @@ public class Configuration {
      * Set of all servers.
      */
     private Map<String, ServerInfo> servers;
+    private boolean onlineMode = false; // BMC
     private boolean ipForwarding = true;
     private String messagingSecret;
     private int playerLimit = -1;
@@ -43,11 +44,10 @@ public class Configuration {
 
         timeout = adapter.getInt("timeout", timeout);
         //uuid = adapter.getString( "stats", uuid ); // BMC - remove stats key
+        onlineMode = adapter.getBoolean("online_mode", false); // BMC
         playerLimit = adapter.getInt("player_limit", playerLimit);
-
         ipForwarding = adapter.getBoolean("ip_forward", true);
-
-        sendLoginPacketOnServerSwitch = adapter.getBoolean("send-login-packet-on-server-switch", false); // BMC
+        sendLoginPacketOnServerSwitch = adapter.getBoolean("send_login_packet_on_server_switch", false); // BMC
 
         messagingSecret = adapter.getString("messaging_secret", "change_me");
         Preconditions.checkArgument(!messagingSecret.equals("change_me"), "Change 'messaging_secret' to something more unique");

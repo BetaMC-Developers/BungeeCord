@@ -71,7 +71,7 @@ public class DownstreamBridge extends PacketHandler {
 
         MessageData data = MessagingHandler.handleServerSpecialMessage(BungeeCord.getInstance().config.getMessagingSecret(), chat.message);
         if (data != null) {
-            if (!con.handshake.username.equals(data.getUsername())) {
+            if (!con.login.username.equals(data.getUsername())) { // BMC - handshake -> login
                 return;
             }
 
