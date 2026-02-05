@@ -34,6 +34,11 @@ public abstract class PacketHandler {
     public void handle(Packet9Respawn respawn) throws Exception {
     }
 
+    // BMC start - restore plugin messaging
+    public void handle(PacketFAPluginMessage pluginMessage) throws Exception {
+    }
+    // BMC end
+
     public void handle(PacketFEPing ping) throws Exception {
     }
 

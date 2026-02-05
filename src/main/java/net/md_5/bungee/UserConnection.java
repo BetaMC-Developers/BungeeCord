@@ -28,6 +28,7 @@ import net.md_5.bungee.packet.Packet1Login;
 import net.md_5.bungee.packet.Packet2Handshake;
 import net.md_5.bungee.packet.Packet3Chat;
 import net.md_5.bungee.packet.Packet9Respawn;
+import net.md_5.bungee.packet.PacketFAPluginMessage;
 import net.md_5.bungee.packet.PacketFFKick;
 
 import java.net.InetSocketAddress;
@@ -99,11 +100,6 @@ public final class UserConnection implements ProxiedPlayer {
         } else {
             connect(target, false);
         }
-    }
-
-    @Override
-    public void sendData(String channel, byte[] data) {
-
     }
 
     public void connectNow(ServerInfo target) {
@@ -180,6 +176,13 @@ public final class UserConnection implements ProxiedPlayer {
             sendMessage(message);
         }
     }
+
+    // BMC start - restore plugin messaging
+    @Override
+    public void sendData(String channel, byte[] data) {
+        ch.write(new PacketFAPluginMessage(channel, data));
+    }
+    // BMC end
 
     @Override
     public InetSocketAddress getAddress() {

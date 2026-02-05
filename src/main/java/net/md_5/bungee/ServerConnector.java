@@ -54,6 +54,8 @@ public class ServerConnector extends PacketHandler {
         ServerConnectedEvent event = new ServerConnectedEvent(user, server);
         bungee.getPluginManager().callEvent(event);
 
+        ch.write(BungeeCord.getInstance().registerChannels()); // BMC - restore plugin messaging
+
         // TODO: Race conditions with many connects
         Queue<DefinedPacket> packetQueue = ((BungeeServerInfo) target).getPacketQueue();
         while (!packetQueue.isEmpty()) {

@@ -40,6 +40,7 @@ import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.YamlConfig;
 import net.md_5.bungee.netty.PipelineUtils;
 import net.md_5.bungee.packet.DefinedPacket;
+import net.md_5.bungee.packet.PacketFAPluginMessage;
 import net.md_5.bungee.scheduler.BungeeScheduler;
 
 import java.io.BufferedReader;
@@ -336,17 +337,17 @@ public class BungeeCord extends ProxyServer {
         return Collections.unmodifiableCollection(pluginChannels);
     }
 
-    /*public PacketFAPluginMessage registerChannels()
-    {
+    // BMC start - restore plugin messaging
+    public PacketFAPluginMessage registerChannels() {
         StringBuilder sb = new StringBuilder();
-        for ( String s : getChannels() )
-        {
-            sb.append( s );
-            sb.append( '\00' );
+        for (String s : getChannels()) {
+            sb.append(s);
+            sb.append('\00');
         }
-        byte[] payload = sb.substring( 0, sb.length() - 1 ).getBytes();
-        return new PacketFAPluginMessage( "REGISTER", payload );
-    }*/
+        byte[] payload = sb.substring(0, sb.length() - 1).getBytes();
+        return new PacketFAPluginMessage("REGISTER", payload);
+    }
+    // BMC end
 
     @Override
     public byte getProtocolVersion() {

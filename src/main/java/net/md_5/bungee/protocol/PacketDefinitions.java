@@ -194,6 +194,11 @@ public class PacketDefinitions {
         opCodes[0xC8] = new OpCode[]{
                 INT, BYTE
         };
+        // BMC start - restore plugin messaging
+        opCodes[0xFA] = new OpCode[]{
+                STRING, SHORT_BYTE
+        };
+        // BMC end
         opCodes[0xFE] = new OpCode[]{
                 BYTE
         };

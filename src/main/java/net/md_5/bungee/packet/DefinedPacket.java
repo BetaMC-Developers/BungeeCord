@@ -197,6 +197,7 @@ public abstract class DefinedPacket implements DataOutput {
         classes[0x02] = Packet2Handshake.class;
         classes[0x03] = Packet3Chat.class;
         classes[0x09] = Packet9Respawn.class;
+        classes[0xFA] = PacketFAPluginMessage.class; // BMC - restore plugin messaging
         classes[0xFE] = PacketFEPing.class;
         classes[0xFF] = PacketFFKick.class;
     }

@@ -15,6 +15,7 @@ import net.md_5.bungee.connection.PingHandler;
 import net.md_5.bungee.netty.HandlerBoss;
 import net.md_5.bungee.netty.PipelineUtils;
 import net.md_5.bungee.packet.DefinedPacket;
+import net.md_5.bungee.packet.PacketFAPluginMessage;
 
 import java.net.InetSocketAddress;
 import java.util.Queue;
@@ -35,7 +36,7 @@ public class BungeeServerInfo extends ServerInfo {
         if (server != null) {
             server.sendData(channel, data);
         } else {
-            //packetQueue.add( new PacketFAPluginMessage( channel, data ) );
+            packetQueue.add(new PacketFAPluginMessage(channel, data));
         }
     }
 
