@@ -1,5 +1,6 @@
 package net.md_5.bungee;
 
+import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
@@ -47,13 +48,15 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -109,7 +112,7 @@ public class BungeeCord extends ProxyServer {
     /**
      * Fully qualified connections.
      */
-    public Map<String, UserConnection> connections = new ConcurrentHashMap<>();
+    public final Map<String, UserConnection> connections = Collections.synchronizedMap(new LinkedHashMap<>()); // BMC - synchronized map
     /**
      * Plugin manager.
      */
@@ -243,9 +246,11 @@ public class BungeeCord extends ProxyServer {
         stopListeners();
         getLogger().info("Closing pending connections");
 
-        getLogger().info("Disconnecting " + connections.size() + " connections");
-        for (UserConnection user : connections.values()) {
-            user.disconnect("Proxy restarting, brb.");
+        synchronized (connections) { // BMC - synchronized
+            getLogger().info("Disconnecting " + connections.size() + " connections");
+            for (UserConnection user : connections.values()) {
+                user.disconnect("Proxy restarting, brb.");
+            }
         }
 
         getLogger().info("Closing IO threads");
@@ -271,6 +276,7 @@ public class BungeeCord extends ProxyServer {
      *
      * @param packet the packet to send
      */
+    @Synchronized("connections") // BMC - synchronized
     public void broadcast(DefinedPacket packet) {
         for (UserConnection con : connections.values()) {
             con.sendPacket(packet);
@@ -293,9 +299,9 @@ public class BungeeCord extends ProxyServer {
     }
 
     @Override
-    @SuppressWarnings("unchecked") // TODO: Abstract more
+    @Synchronized("connections") // BMC - synchronized
     public Collection<ProxiedPlayer> getPlayers() {
-        return (Collection) connections.values();
+        return Collections.unmodifiableCollection(new ArrayList<>(connections.values())); // BMC - return copy instead of view
     }
 
     @Override
@@ -318,6 +324,18 @@ public class BungeeCord extends ProxyServer {
     public ServerInfo getServerInfo(String name) {
         return getServers().get(name);
     }
+
+    // BMC start
+    public boolean addConnection(UserConnection con) {
+        Preconditions.checkNotNull(con, "con");
+        return connections.putIfAbsent(con.getName().toLowerCase(Locale.ROOT), con) == null;
+    }
+
+    public void removeConnection(UserConnection con) {
+        Preconditions.checkNotNull(con, "con");
+        connections.remove(con.getName().toLowerCase(Locale.ROOT));
+    }
+    // BMC end
 
     @Override
     @Synchronized("pluginChannels")

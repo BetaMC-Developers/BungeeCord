@@ -113,6 +113,11 @@ public class InitialHandler extends PacketHandler implements PendingConnection {
         Preconditions.checkArgument(login.username.length() <= 16, "Login username cannot be longer than 16 characters");
 
         UserConnection userCon = new UserConnection((BungeeCord) bungee, ch, this, handshake, login);
+        if (!BungeeCord.getInstance().addConnection(userCon)) {
+            disconnect("A player with your name is already connected");
+            return;
+        }
+
         bungee.getPluginManager().callEvent(new PostLoginEvent(userCon));
 
         ch.pipeline().get(HandlerBoss.class).setHandler(new UpstreamBridge(bungee, userCon));

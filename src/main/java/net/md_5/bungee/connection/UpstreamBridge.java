@@ -2,6 +2,7 @@ package net.md_5.bungee.connection;
 
 import io.netty.channel.Channel;
 import lombok.RequiredArgsConstructor;
+import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.EntityMap;
 import net.md_5.bungee.UserConnection;
 import net.md_5.bungee.Util;
@@ -30,7 +31,7 @@ public class UpstreamBridge extends PacketHandler {
         // We lost connection to the client
         PlayerDisconnectEvent event = new PlayerDisconnectEvent(con);
         bungee.getPluginManager().callEvent(event);
-        bungee.getPlayers().remove(con);
+        BungeeCord.getInstance().removeConnection(con); // BMC - removeConnection
 
         if (con.getServer() != null) {
             con.getServer().disconnect("Quitting");

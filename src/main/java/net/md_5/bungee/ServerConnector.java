@@ -64,7 +64,7 @@ public class ServerConnector extends PacketHandler {
 
         synchronized (user.getSwitchMutex()) {
             if (user.getServer() == null) {
-                BungeeCord.getInstance().connections.put(user.getName(), user);
+                //BungeeCord.getInstance().connections.put(user.getName(), user); // BMC
                 // Once again, first connection
                 user.clientEntityId = login.entityId;
                 user.serverEntityId = login.entityId;

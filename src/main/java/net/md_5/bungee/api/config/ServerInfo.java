@@ -63,7 +63,7 @@ public abstract class ServerInfo {
      */
     @Synchronized("players")
     public Collection<ProxiedPlayer> getPlayers() {
-        return Collections.unmodifiableCollection(players);
+        return Collections.unmodifiableCollection(new ArrayList<>(players)); // BMC - return copy instead of view
     }
 
     /**
