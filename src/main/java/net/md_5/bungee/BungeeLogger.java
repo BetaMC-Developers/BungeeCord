@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
 import java.util.logging.Level;
@@ -15,41 +16,51 @@ import java.util.logging.Logger;
  */
 public class BungeeLogger extends Logger {
 
-    private static final Formatter formatter = new ConsoleLogFormatter();
     static final BungeeLogger instance = new BungeeLogger();
 
     public BungeeLogger() {
         super("BungeeCord", null);
+        setUseParentHandlers(false); // BMC
         try {
-            FileHandler handler = new FileHandler("proxy.log", true); // BMC - don't limit log file size
-            handler.setFormatter(formatter);
-            addHandler(handler);
+            // BMC start - different date formats, infinite log file size
+            ConsoleHandler consoleHandler = new ConsoleHandler();
+            consoleHandler.setFormatter(new ConsoleLogFormatter(new SimpleDateFormat("HH:mm:ss")));
+            FileHandler fileHandler = new FileHandler("proxy.log", true);
+            fileHandler.setFormatter(new ConsoleLogFormatter(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")));
+            addHandler(consoleHandler);
+            addHandler(fileHandler);
+            // BMC end
         } catch (IOException ex) {
             System.err.println("Could not register logger!");
             ex.printStackTrace();
         }
     }
 
-    @Override
+    /*@Override // BMC - comment out
     public void log(LogRecord record) {
         super.log(record);
-        String message = formatter.format(record);
         if (record.getLevel() == Level.SEVERE || record.getLevel() == Level.WARNING) {
-            System.err.print(message);
+            System.err.print(record.getMessage());
         } else {
-            System.out.print(message);
+            System.out.print(record.getMessage());
         }
-    }
+    }*/
 
-    public static class ConsoleLogFormatter extends Formatter {
+    private static class ConsoleLogFormatter extends Formatter {
 
-        private SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+        // BMC start - supply date format
+        private SimpleDateFormat dateFormat;
+
+        private ConsoleLogFormatter(SimpleDateFormat dateFormat) {
+            this.dateFormat = dateFormat;
+        }
+        // BMC end
 
         @Override
         public String format(LogRecord logrecord) {
             StringBuilder formatted = new StringBuilder();
 
-            formatted.append(formatter.format(logrecord.getMillis()));
+            formatted.append(dateFormat.format(logrecord.getMillis()));
             Level level = logrecord.getLevel();
 
             if (level == Level.FINEST) {
