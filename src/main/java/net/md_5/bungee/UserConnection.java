@@ -28,7 +28,6 @@ import net.md_5.bungee.packet.Packet1Login;
 import net.md_5.bungee.packet.Packet2Handshake;
 import net.md_5.bungee.packet.Packet3Chat;
 import net.md_5.bungee.packet.Packet9Respawn;
-import net.md_5.bungee.packet.PacketFAPluginMessage;
 import net.md_5.bungee.packet.PacketFFKick;
 
 import java.net.InetSocketAddress;
@@ -178,10 +177,10 @@ public final class UserConnection implements ProxiedPlayer {
         }
     }
 
-    // BMC start - restore plugin messaging
+    // BMC start - remove plugin messaging from/to clients
     @Override
     public void sendData(String channel, byte[] data) {
-        ch.write(new PacketFAPluginMessage(channel, data));
+        throw new UnsupportedOperationException("Cannot send plugin messages to clients");
     }
     // BMC end
 

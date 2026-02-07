@@ -196,6 +196,8 @@ public class DownstreamBridge extends PacketHandler {
                     con.getServer().sendData("BungeeCord", b);
                 }
             }
+        } else {
+            throw new CancelSendSignal();
         }
     }
     // BMC end
