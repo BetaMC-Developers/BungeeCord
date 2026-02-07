@@ -111,6 +111,8 @@ public final class UserConnection implements ProxiedPlayer {
     public void connect(ServerInfo info, final boolean retry) {
         ServerConnectEvent event = new ServerConnectEvent(this, info);
         ProxyServer.getInstance().getPluginManager().callEvent(event);
+        if (event.isCancelled()) return; // BMC - make ServerConnectEvent cancellable
+
         final ServerInfo target = event.getTarget(); // Update in case the event changed target
         new Bootstrap()
                 // BMC - use Epoll I/O if it's available
