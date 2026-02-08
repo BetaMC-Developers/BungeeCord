@@ -63,6 +63,12 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>org.spongepowered</groupId>
+            <artifactId>configurate-yaml</artifactId>
+            <version>4.2.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
             <version>2.5</version>
@@ -130,6 +136,7 @@
                             <excludes>
                                 <exclude>**/*.java</exclude>
                                 <exclude>**/*.SF</exclude>
+                                <exclude>**/*.RSA</exclude>
                                 <exclude>**/*.DSA</exclude>
                             </excludes>
                         </filter>
