@@ -56,10 +56,11 @@ public class ServerConnector extends PacketHandler {
 
         ch.write(BungeeCord.getInstance().registerChannels()); // BMC - restore plugin messaging
 
-        // TODO: Race conditions with many connects
         Queue<DefinedPacket> packetQueue = ((BungeeServerInfo) target).getPacketQueue();
-        while (!packetQueue.isEmpty()) {
-            ch.writeAndFlush(packetQueue.poll()); // BMC - writeAndFlush
+        synchronized (packetQueue) { // BMC - synchronized
+            while (!packetQueue.isEmpty()) {
+                ch.writeAndFlush(packetQueue.poll()); // BMC - writeAndFlush
+            }
         }
 
         synchronized (user.getSwitchMutex()) {
@@ -101,12 +102,13 @@ public class ServerConnector extends PacketHandler {
                 user.getServer().disconnect("Quitting");
             }
 
-            // TODO: Fix this?
-            /*if ( !user.ch.isActive() )
-            {
-                server.disconnect( "Quitting" );
-                throw new IllegalStateException( "No client connected for pending server!" );
-            }*/
+            // BMC start - uncomment
+            if (!user.ch.isActive()) {
+                server.disconnect("Quitting");
+                bungee.getLogger().warning("No client connected for pending server!");
+                return;
+            }
+            // BMC end
 
             // Add to new server
             // TODO: Move this to the connected() method of DownstreamBridge
