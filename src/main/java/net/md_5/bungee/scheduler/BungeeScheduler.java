@@ -52,18 +52,30 @@ public class BungeeScheduler implements TaskScheduler {
 
     @Override
     public ScheduledTask schedule(Plugin owner, Runnable task, long delay, TimeUnit unit) {
-        return prepare(owner, task).setFuture(BungeeCord.getInstance().executors.schedule(task, delay, unit));
+        BungeeTask bungeeTask = prepare(owner, task); // BMC
+        return bungeeTask.setFuture(BungeeCord.getInstance().executors.schedule(bungeeTask.getTask(), delay, unit));
     }
 
     @Override
     public ScheduledTask schedule(Plugin owner, Runnable task, long delay, long period, TimeUnit unit) {
-        return prepare(owner, task).setFuture(BungeeCord.getInstance().executors.scheduleWithFixedDelay(task, delay, period, unit));
+        BungeeTask bungeeTask = prepare(owner, task); // BMC
+        return bungeeTask.setFuture(BungeeCord.getInstance().executors.scheduleWithFixedDelay(bungeeTask.getTask(), delay, period, unit));
     }
 
     private BungeeTask prepare(Plugin owner, Runnable task) {
         Preconditions.checkNotNull(owner, "owner");
         Preconditions.checkNotNull(task, "task");
-        BungeeTask prepared = new BungeeTask(taskCounter.getAndIncrement(), owner, task);
+        // BMC start - fix repeating tasks being cancelled when an error occurs
+        Runnable wrappedTask = () -> {
+            try {
+                task.run();
+            } catch (Throwable t) {
+                t.printStackTrace();
+            }
+        };
+        // BMC end
+
+        BungeeTask prepared = new BungeeTask(taskCounter.getAndIncrement(), owner, wrappedTask);
         tasks.put(prepared.getId(), prepared);
         return prepared;
     }
