@@ -17,8 +17,6 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.ChatEvent;
 import net.md_5.bungee.api.event.PluginMessageEvent;
 import net.md_5.bungee.api.event.ServerKickEvent;
-import net.md_5.bungee.messaging.MessageData;
-import net.md_5.bungee.messaging.MessagingHandler;
 import net.md_5.bungee.packet.Packet0KeepAlive;
 import net.md_5.bungee.packet.Packet3Chat;
 import net.md_5.bungee.packet.PacketFAPluginMessage;
@@ -71,22 +69,6 @@ public class DownstreamBridge extends PacketHandler {
         bungee.getPluginManager().callEvent(chatEvent);
 
         if (chatEvent.isCancelled()) {
-            throw new CancelSendSignal();
-        }
-
-        MessageData data = MessagingHandler.handleServerSpecialMessage(BungeeCord.getInstance().config.getMessagingSecret(), chat.message);
-        if (data != null) {
-            if (!con.login.username.equals(data.getUsername())) { // BMC - handshake -> login
-                return;
-            }
-
-            ProxiedPlayer player = bungee.getPlayer(data.getUsername());
-            if (player != null) {
-                ServerInfo targetServer = bungee.getServerInfo(data.getTargetServer());
-                if (targetServer != null) {
-                    player.connect(targetServer);
-                }
-            }
             throw new CancelSendSignal();
         }
     }
