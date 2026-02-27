@@ -35,6 +35,6 @@ public class ChatEvent extends TargetedEvent implements Cancellable {
      * @return if this message is a command
      */
     public boolean isCommand() {
-        return message.charAt(0) == '/';
+        return !this.message.isEmpty() && this.message.charAt(0) == '/'; // BMC - add isEmpty check
     }
 }
