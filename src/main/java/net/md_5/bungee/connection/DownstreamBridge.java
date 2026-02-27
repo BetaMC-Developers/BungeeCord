@@ -5,7 +5,6 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import io.netty.channel.Channel;
 import lombok.RequiredArgsConstructor;
-import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.EntityMap;
 import net.md_5.bungee.ServerConnection;
 import net.md_5.bungee.UserConnection;

@@ -1,32 +1,50 @@
 package net.md_5.bungee.api;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 /**
- * Represents the standard list data returned by opening a server in the
- * Minecraft client server list, or hitting it with a packet 0xFE.
+ * Represents the standard data returned by pinging a server using the modern query protocol.
  */
 @Data
+@ToString(exclude = "favicon")
+@NoArgsConstructor
+@AllArgsConstructor
 public class ServerPing {
 
-    /**
-     * Numeric protocol version supported by the server.
-     */
-    private final byte protocolVersion;
-    /**
-     * Human readable game version.
-     */
-    private final String gameVersion;
-    /**
-     * Server MOTD.
-     */
-    private final String motd;
-    /**
-     * Current amount of players on the server.
-     */
-    private final int currentPlayers;
-    /**
-     * Max amount of players the server will allow.
-     */
-    private final int maxPlayers;
+    private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
+
+    private Version version;
+    private Players players;
+    private Description description;
+    private String favicon;
+
+    @Data
+    @AllArgsConstructor
+    public static class Version {
+        private String name;
+        private int protocol;
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class Players {
+        private int max;
+        private int online;
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class Description {
+        private String text;
+    }
+
+    public String toJson() {
+        return GSON.toJson(this);
+    }
+
 }

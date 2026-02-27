@@ -1,7 +1,6 @@
 package net.md_5.bungee.connection;
 
 import com.google.common.base.Preconditions;
-import com.google.gson.JsonObject;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.ByteBufOutputStream;
 import io.netty.buffer.Unpooled;
@@ -22,7 +21,6 @@ import net.md_5.bungee.api.event.ProxyPingEvent;
 import net.md_5.bungee.netty.HandlerBoss;
 import net.md_5.bungee.packet.Packet1Login;
 import net.md_5.bungee.packet.Packet2Handshake;
-import net.md_5.bungee.packet.PacketFEPing;
 import net.md_5.bungee.packet.PacketFFKick;
 import net.md_5.bungee.packet.PacketHandler;
 
@@ -66,22 +64,6 @@ public class InitialHandler extends PacketHandler implements PendingConnection {
     @Override
     public void exception(Throwable t) throws Exception {
         disconnect(ChatColor.RED + Util.exception(t));
-    }
-
-    @Override
-    public void handle(PacketFEPing ping) throws Exception {
-        ServerPing response = new ServerPing(bungee.getProtocolVersion(), bungee.getGameVersion(),
-                listener.getMotd(), bungee.getPlayers().size(), listener.getMaxPlayers());
-
-        response = bungee.getPluginManager().callEvent(new ProxyPingEvent(this, response)).getResponse();
-
-        String kickMessage = ChatColor.DARK_BLUE
-                + "\00" + response.getProtocolVersion()
-                + "\00" + response.getGameVersion()
-                + "\00" + response.getMotd()
-                + "\00" + response.getCurrentPlayers()
-                + "\00" + response.getMaxPlayers();
-        disconnect(kickMessage);
     }
 
     @Override
@@ -154,31 +136,20 @@ public class InitialHandler extends PacketHandler implements PendingConnection {
     }
 
     private void doStatusResponse() throws IOException {
-        JsonObject root = new JsonObject();
-
-        JsonObject version = new JsonObject();
-        version.addProperty("name", bungee.getGameVersion());
-        version.addProperty("protocol", requestVersion);
-        root.add("version", version);
-
-        JsonObject players = new JsonObject();
-        players.addProperty("max", listener.getMaxPlayers());
-        players.addProperty("online", bungee.getPlayers().size());
-        root.add("players", players);
-
-        JsonObject description = new JsonObject();
-        description.addProperty("text", listener.getMotd());
-        root.add("description", description);
-
+        ServerPing data = new ServerPing();
+        data.setVersion(new ServerPing.Version(bungee.getGameVersion(), requestVersion));
+        data.setPlayers(new ServerPing.Players(listener.getMaxPlayers(), bungee.getPlayers().size()));
+        data.setDescription(new ServerPing.Description(listener.getMotd()));
         if (bungee.getIcon().getRawData() != null) {
-            root.addProperty("favicon", "data:image/png;base64," + new String(bungee.getIcon().getRawData(), StandardCharsets.ISO_8859_1));
+            data.setFavicon("data:image/png;base64," + new String(bungee.getIcon().getRawData(), StandardCharsets.ISO_8859_1));
         }
+
+        data = bungee.getPluginManager().callEvent(new ProxyPingEvent(this, data)).getResponse();
 
         ByteBufOutputStream out = new ByteBufOutputStream(Unpooled.buffer());
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        String response = root.toString();
         Util.writeVarInt(0, bytes);
-        Util.writeUTF8(response, bytes);
+        Util.writeUTF8(data.toJson(), bytes);
         Util.writeVarInt(bytes.size(), out);
         bytes.writeTo(out);
         ch.writeAndFlush(out.buffer());

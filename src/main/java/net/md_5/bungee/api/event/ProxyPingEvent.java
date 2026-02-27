@@ -9,7 +9,7 @@ import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.plugin.Event;
 
 /**
- * Called when the proxy is pinged with packet 0xFE from the server list.
+ * Called when the proxy is pinged using the modern query protocol.
  */
 @Data
 @AllArgsConstructor

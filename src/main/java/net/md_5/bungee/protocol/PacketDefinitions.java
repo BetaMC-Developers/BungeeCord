@@ -199,9 +199,6 @@ public class PacketDefinitions {
                 STRING, SHORT_BYTE
         };
         // BMC end
-        opCodes[0xFE] = new OpCode[]{
-                BYTE
-        };
         opCodes[0xFF] = new OpCode[]{
                 STRING
         };

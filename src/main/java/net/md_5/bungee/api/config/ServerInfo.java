@@ -79,7 +79,7 @@ public abstract class ServerInfo {
      *
      * @param callback the callback to call when the count has been retrieved.
      */
-    public abstract void ping(Callback<ServerPing> callback);
+    //public abstract void ping(Callback<ServerPing> callback); // BMC - remove
 
     /**
      * Whether the player can access this server. It will only return false when
