@@ -306,7 +306,7 @@ public class BungeeCord extends ProxyServer {
 
     @Override
     public ProxiedPlayer getPlayer(String name) {
-        return connections.get(name);
+        return connections.get(name.toLowerCase(Locale.ROOT)); // BMC - case insensitive
     }
 
     @Override

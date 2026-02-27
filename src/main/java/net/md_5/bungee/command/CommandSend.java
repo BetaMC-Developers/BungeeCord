@@ -40,8 +40,9 @@ public class CommandSend extends Command {
             ProxiedPlayer player = ProxyServer.getInstance().getPlayer(args[0]);
             if (player == null) {
                 sender.sendMessage(ChatColor.RED + "That player is not online");
+            } else {
+                summon(player, target, sender);
             }
-            summon(player, target, sender);
         }
         sender.sendMessage(ChatColor.GREEN + "Successfully summoned player(s)");
     }
