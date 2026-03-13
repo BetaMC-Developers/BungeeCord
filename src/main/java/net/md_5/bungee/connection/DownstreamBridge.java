@@ -5,6 +5,7 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import io.netty.channel.Channel;
 import lombok.RequiredArgsConstructor;
+import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.EntityMap;
 import net.md_5.bungee.ServerConnection;
 import net.md_5.bungee.UserConnection;
@@ -75,6 +76,10 @@ public class DownstreamBridge extends PacketHandler {
     // BMC start - restore plugin messaging
     @Override
     public void handle(PacketFAPluginMessage pluginMessage) throws Exception {
+        if (!BungeeCord.getInstance().config.isEnablePluginMessaging()) {
+            return;
+        }
+
         ByteArrayDataInput in = ByteStreams.newDataInput(pluginMessage.data);
         PluginMessageEvent event = new PluginMessageEvent(con.getServer(), con, pluginMessage.tag, pluginMessage.data.clone());
 

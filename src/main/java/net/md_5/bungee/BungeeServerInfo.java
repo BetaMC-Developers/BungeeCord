@@ -20,14 +20,18 @@ public class BungeeServerInfo extends ServerInfo {
         super(name, address, restricted);
     }
 
+    // BMC start - restore plugin messaging
     @Override
     public void sendData(String channel, byte[] data) {
         Server server = ProxyServer.getInstance().getServer(getName());
         if (server != null) {
             server.sendData(channel, data);
+        } else if (!BungeeCord.getInstance().config.isEnablePluginMessaging()) {
+            throw new IllegalStateException("Plugin messaging is disabled! Set enable_plugin_messaging to 'true' in config.yml to use it.");
         } else {
             packetQueue.add(new PacketFAPluginMessage(channel, data));
         }
     }
+    // BMC end
 
 }

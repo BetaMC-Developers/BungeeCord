@@ -35,6 +35,7 @@ public class Configuration {
     private boolean onlineMode = false; // BMC
     private boolean ipForwarding = true;
     private int playerLimit = -1;
+    private boolean enablePluginMessaging = false; // BMC
     private boolean sendLoginPacketOnServerSwitch = false; // BMC
 
     public void load() {
@@ -46,6 +47,7 @@ public class Configuration {
         onlineMode = adapter.getBoolean("online_mode", false); // BMC
         playerLimit = adapter.getInt("player_limit", playerLimit);
         ipForwarding = adapter.getBoolean("ip_forward", true);
+        enablePluginMessaging = adapter.getBoolean("enable_plugin_messaging", false); // BMC
         sendLoginPacketOnServerSwitch = adapter.getBoolean("send_login_packet_on_server_switch", false); // BMC
 
         listeners = adapter.getListeners();

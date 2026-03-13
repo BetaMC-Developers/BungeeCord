@@ -26,10 +26,15 @@ public class ServerConnection implements Server {
     @Setter
     private boolean isObsolete;
 
+    // BMC start - restore plugin messaging
     @Override
     public void sendData(String channel, byte[] data) {
+        if (!BungeeCord.getInstance().config.isEnablePluginMessaging()) {
+            throw new IllegalStateException("Plugin messaging is disabled! Set enable_plugin_messaging to 'true' in config.yml to use it.");
+        }
         ch.write(new PacketFAPluginMessage(channel, data));
     }
+    // BMC end
 
     @Override
     public synchronized void disconnect(String reason) {
